@@ -1,0 +1,753 @@
+<template>
+
+  <div class="dish-container">
+
+    <el-card>
+
+      <template #header>
+
+        <div class="header">
+
+          <span>菜品管理</span>
+
+          <el-button
+            type="primary"
+            @click="openAdd"
+          >
+            新增菜品
+          </el-button>
+
+        </div>
+
+      </template>
+
+      <!-- 查询区域 -->
+
+      <el-row :gutter="20" style="margin-bottom:20px">
+
+        <el-col :span="6">
+
+          <el-input
+            v-model="searchForm.name"
+            placeholder="请输入菜品名称"
+            clearable
+          />
+
+        </el-col>
+
+        <el-col :span="6">
+
+          <el-select
+            v-model="searchForm.categoryId"
+            placeholder="请选择分类"
+            clearable
+            style="width:100%"
+          >
+
+            <el-option
+              v-for="item in categoryList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+
+          </el-select>
+
+        </el-col>
+
+        <el-col :span="12">
+
+          <el-button
+            type="primary"
+            @click="search"
+          >
+            查询
+          </el-button>
+
+          <el-button
+            @click="resetSearch"
+          >
+            重置
+          </el-button>
+
+          <el-button
+            type="danger"
+            @click="batchRemove"
+          >
+            批量删除
+          </el-button>
+
+        </el-col>
+
+      </el-row>
+
+      <!-- 表格 -->
+      <el-table
+        :data="tableData"
+        stripe
+        v-loading="loading"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="40" />
+
+        <el-table-column label="菜品" min-width="280">
+          <template #default="scope">
+            <div class="dish-cell">
+              <el-image
+                :src="scope.row.image
+                   ? 'http://localhost:8080' + scope.row.image
+                   : '/images/default-dish.png'"
+                class="dish-img"
+                fit="cover"
+                :preview-src-list="[
+                  scope.row.image
+                    ? 'http://localhost:8080' + scope.row.image
+                    : '/images/default-dish.png'
+                ]"
+                preview-teleported
+              />
+              <div class="dish-info">
+                <div class="dish-name">{{ scope.row.name }}</div>
+                <div class="dish-meta">
+                  <span class="dish-category">{{ scope.row.categoryName }}</span>
+                  <span v-if="scope.row.description" class="dish-desc">{{ scope.row.description }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="price" label="价格" width="100" align="right">
+          <template #default="scope">
+            <span class="price-text">¥{{ scope.row.price }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="sort" label="排序" width="70" align="center" />
+
+        <el-table-column label="状态" width="80" align="center">
+          <template #default="scope">
+            <el-switch
+              v-model="scope.row.status"
+              :active-value="1"
+              :inactive-value="0"
+              @change="changeStatus(scope.row)"
+            />
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="140" align="center">
+          <template #default="scope">
+            <el-button link type="primary" @click="openEdit(scope.row)">
+              编辑
+            </el-button>
+            <el-button link type="danger" @click="remove(scope.row)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="pagination">
+
+        <el-pagination
+
+          v-model:current-page="page.pageNum"
+
+          v-model:page-size="page.pageSize"
+
+          :page-sizes="[5,10,20,50]"
+
+          layout="total, sizes, prev, pager, next, jumper"
+
+          :total="page.total"
+
+          @size-change="loadData"
+
+          @current-change="loadData"
+
+        />
+
+      </div>
+
+
+    </el-card>
+    <el-dialog
+      v-model="dialogVisible"
+      :title="isEdit ? '编辑菜品' : '新增菜品'"
+      width="600px"
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="90px"
+      >
+
+        <el-form-item label="菜品名称" prop="name">
+          <el-input v-model="form.name" />
+        </el-form-item>
+        <el-form-item label="菜品图片">
+
+          <el-upload
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :http-request="uploadFile"
+          >
+
+            <img
+              v-if="form.image"
+              :src="'http://localhost:8080' + form.image"
+              style="width:120px;height:120px;border-radius:6px"
+            />
+
+            <el-button
+              v-else
+              type="primary"
+            >
+              上传图片
+            </el-button>
+
+          </el-upload>
+
+        </el-form-item>
+
+        <el-form-item label="所属分类" prop="categoryId">
+          <el-select
+            v-model="form.categoryId"
+            style="width:100%"
+          >
+            <el-option
+              v-for="item in categoryList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="价格" prop="price">
+          <el-input-number
+            v-model="form.price"
+            :min="0.01"
+            :precision="2"
+            :step="1"
+            style="width:100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="排序" prop="sort">
+          <el-input-number
+            v-model="form.sort"
+            :min="0"
+            style="width:100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="状态">
+          <el-radio-group v-model="form.status">
+            <el-radio :value="1">启用</el-radio>
+            <el-radio :value="0">停售</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="菜品介绍">
+          <el-input
+            type="textarea"
+            v-model="form.description"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+
+      </el-form>
+
+      <template #footer>
+
+        <el-button @click="dialogVisible=false">
+          取消
+        </el-button>
+
+        <el-button
+          type="primary"
+          @click="saveDish"
+        >
+          保存
+        </el-button>
+
+      </template>
+
+    </el-dialog>
+  </div>
+
+</template>
+
+<script setup>
+
+import {ref, reactive, onMounted} from "vue"
+import {
+  getDishList,
+  getSimpleCategory,
+  addDish,
+  updateDish,
+  deleteDish,
+  updateDishStatus,
+  batchDeleteDish
+} from '@/api/dish'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { uploadImage } from "@/api/upload"
+
+const tableData = ref([])
+const page = reactive({
+
+  pageNum:1,
+
+  pageSize:10,
+
+  total:0
+
+})
+
+const loading = ref(false)
+
+const categoryList = ref([])
+
+const searchForm = reactive({
+
+  name: "",
+
+  categoryId: null
+
+})
+const dialogVisible = ref(false)
+
+const isEdit = ref(false)
+
+const formRef = ref()
+
+const selectedIds = ref([])
+
+const form = reactive({
+  id: null,
+  name: "",
+  categoryId: null,
+  price: null,
+  sort: 0,
+  status: 1,
+  description: "",
+  image: ""
+})
+
+const rules = {
+
+  name: [
+    {
+      required: true,
+      message: "请输入菜品名称",
+      trigger: "blur"
+    },
+    {
+      min: 2,
+      max: 50,
+      message: "菜品名称长度为2~50个字符",
+      trigger: "blur"
+    }
+  ],
+
+  categoryId: [
+    {
+      required: true,
+      message: "请选择分类",
+      trigger: "change"
+    }
+  ],
+
+  price: [
+    {
+      required: true,
+      message: "请输入价格",
+      trigger: "blur"
+    }
+  ],
+
+  sort: [
+    {
+      required: true,
+      message: "请输入排序",
+      trigger: "blur"
+    }
+  ]
+
+}
+
+function openEdit(row) {
+  isEdit.value = true
+  Object.assign(form, JSON.parse(JSON.stringify(row)))
+  dialogVisible.value = true
+}
+// 处理表格多选
+const handleSelectionChange = (selection) => {
+  selectedIds.value = selection.map(item => item.id);
+};
+
+function openAdd(){
+
+  isEdit.value = false
+
+  Object.assign(form,{
+    id:null,
+    name:"",
+    categoryId:null,
+    price:null,
+    sort:0,
+    status:1,
+    description:"",
+    image:""
+  })
+
+  formRef.value?.clearValidate()
+
+  dialogVisible.value = true
+}
+function beforeUpload(file) {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const isAllowed = allowedTypes.includes(file.type);
+
+  if (!isAllowed) {
+    ElMessage.error('仅支持 jpg、jpeg、png、webp 格式的图片');
+    return false;
+  }
+
+  // 顺便加上大小限制（和后端 5MB 对齐）
+  const isLt5M = file.size / 1024 / 1024 < 5;
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB');
+    return false;
+  }
+
+  return true;
+}
+async function remove(row){
+
+  try{
+
+    await ElMessageBox.confirm(
+
+      "确定删除该菜品？",
+
+      "提示",
+
+      {
+        type:"warning"
+      }
+
+    )
+
+    const res = await deleteDish(row.id)
+
+    if(res.data.code==200){
+
+      ElMessage.success("删除成功")
+
+      loadData()
+
+    }else{
+
+      ElMessage.error(res.data.message)
+
+    }
+
+  }catch{
+
+  }
+
+}
+async function changeStatus(row){
+
+  const res = await updateDishStatus(
+
+    row.id,
+
+    row.status
+
+  )
+
+  if(res.data.code===200){
+
+    ElMessage.success("状态修改成功")
+
+  }else{
+
+    ElMessage.error(res.data.message)
+
+    loadData()
+
+  }
+
+}
+
+async function uploadFile(option){
+
+  const res = await uploadImage(option.file)
+
+  if(res.data.code===200){
+
+    form.image = res.data.data
+
+    ElMessage.success("上传成功")
+
+  }else{
+
+    ElMessage.error(res.data.message)
+
+  }
+
+}
+
+function search(){
+
+  page.pageNum=1
+
+  loadData()
+
+}
+
+function resetSearch(){
+
+  searchForm.name=""
+
+  searchForm.categoryId=null
+
+  page.pageNum=1
+
+  loadData()
+
+}
+
+async function saveDish() {
+
+  const valid = await formRef.value.validate().catch(() => false)
+
+  if (!valid) {
+    return
+  }
+
+  let res
+
+  if (isEdit.value) {
+
+    res = await updateDish(form)
+
+  } else {
+
+    res = await addDish(form)
+
+  }
+
+  if (res.data.code == 200) {
+
+    ElMessage.success(isEdit.value ? "修改成功" : "新增成功")
+
+    dialogVisible.value = false
+
+    loadData()
+
+  } else {
+
+    ElMessage.error(res.data.message)
+
+  }
+
+}
+async function loadCategory(){
+
+  const res = await getSimpleCategory()
+
+  if(res.data.code===200){
+
+    categoryList.value=res.data.data
+
+  }
+
+}
+async function batchRemove(){
+
+  if(selectedIds.value.length===0){
+
+    ElMessage.warning(
+      "请选择要删除的菜品"
+    )
+
+    return
+
+  }
+
+
+  try{
+
+    await ElMessageBox.confirm(
+      "确定删除选中的菜品吗？",
+      "提示",
+      {
+        type:"warning"
+      }
+    )
+
+
+    const res =
+      await batchDeleteDish(
+        selectedIds.value
+      )
+
+
+    if(res.data.code===200){
+
+      ElMessage.success(
+        "删除成功"
+      )
+
+      loadData()
+
+    }
+
+
+  }catch(e){
+
+  }
+
+}
+async function loadData(){
+
+  loading.value = true
+
+  try{
+
+    const res = await getDishList({
+
+      pageNum: page.pageNum,
+
+      pageSize: page.pageSize,
+
+      name: searchForm.name,
+
+      categoryId: searchForm.categoryId
+
+    })
+
+
+    if(res.data.code===200){
+
+      tableData.value = res.data.data.records
+
+      page.total = res.data.data.total
+
+    }
+
+
+  }finally{
+
+    loading.value = false
+
+  }
+
+}
+
+onMounted(()=>{
+
+  loadData()
+  loadCategory()
+
+})
+
+
+
+</script>
+
+<style scoped>
+.dish-container {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.pagination {
+  margin-top: var(--sp-5);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.el-row {
+  background: var(--surface-raised);
+  padding: var(--sp-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--sp-5) !important;
+  border: 1px solid var(--border-light);
+}
+
+/* Dish cell: image + info side by side */
+.dish-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dish-img {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.dish-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dish-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.dish-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.dish-category {
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-faint);
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.dish-desc {
+  font-size: 12px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.price-text {
+  font-weight: 600;
+  color: var(--text-1);
+}
+</style>

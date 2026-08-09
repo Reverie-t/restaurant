@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.example.restaurantmanagement.mapper.OrdersMapper">
+
+
+    <select id="list"
+            resultType="org.example.restaurantmanagement.vo.OrderVO">
+
+        SELECT
+
+        id,
+
+        order_no AS orderNo,
+
+        status,
+
+        CASE order_type
+        WHEN 1 THEN '堂食'
+        WHEN 2 THEN '外带'
+        WHEN 3 THEN '外卖'
+        END AS orderTypeName,
+
+        total_amount AS totalAmount,
+
+        CASE status
+        WHEN 1 THEN '待确认'
+        WHEN 2 THEN '制作中'
+        WHEN 3 THEN '待取餐/待上菜'
+        WHEN 4 THEN '已完成'
+        WHEN 5 THEN '已取消'
+        END AS statusName,
+
+        table_no AS tableNo,
+
+        pickup_name AS pickupName,
+
+        create_time AS createTime
+
+        FROM orders
+
+        <where>
+
+            <if test="orderType != null">
+                AND order_type = #{orderType}
+            </if>
+
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+
+        </where>
+
+        ORDER BY create_time DESC
+
+    </select>
+
+
+</mapper>

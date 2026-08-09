@@ -1,0 +1,115 @@
+@import './base.css';
+
+#app {
+  width: 100%;
+  height: 100vh;
+}
+
+/* ── Card ── */
+.el-card {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: box-shadow var(--duration) var(--ease);
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.el-card__header {
+  padding: var(--sp-4) var(--sp-5) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+/* ── Table ── */
+.el-table {
+  --el-table-border-color: var(--border-light);
+  --el-table-header-bg-color: var(--surface-raised);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.el-table th.el-table__cell {
+  font-weight: 600;
+  color: var(--text-2);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--surface-warm);
+}
+
+/* ── Button ── */
+.el-button--primary {
+  --el-button-bg-color: var(--accent);
+  --el-button-border-color: var(--accent);
+  --el-button-hover-bg-color: var(--accent-soft);
+  --el-button-hover-border-color: var(--accent-soft);
+  --el-button-active-bg-color: #b5802e;
+  --el-button-active-border-color: #b5802e;
+}
+
+.el-button {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 500;
+}
+
+/* ── Pagination ── */
+.el-pagination {
+  margin-top: var(--sp-5);
+  justify-content: flex-end;
+}
+
+/* ── Dialog ── */
+.el-dialog {
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--sp-4) var(--sp-5) !important;
+  margin: 0 !important;
+}
+
+.el-dialog__body {
+  padding: var(--sp-5) !important;
+}
+
+.el-dialog__footer {
+  border-top: 1px solid var(--border-light);
+  padding: var(--sp-3) var(--sp-5) !important;
+}
+
+/* ── Form ── */
+.el-form-item__label {
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+/* ── Tag ── */
+.el-tag {
+  border-radius: var(--radius-sm) !important;
+}
+
+/* ── Menu (sidebar) ── */
+.el-menu {
+  border-right: none !important;
+}
+
+/* ── Input ── */
+.el-input__wrapper {
+  border-radius: var(--radius-sm) !important;
+}
+
+/* ── Transition for page content ── */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s var(--ease);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

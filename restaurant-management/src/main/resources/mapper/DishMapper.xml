@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.restaurantmanagement.mapper.DishMapper">
+
+    <select id="list"
+            resultType="org.example.restaurantmanagement.vo.DishVO">
+
+        SELECT
+        d.id,
+        d.name,
+        c.name AS categoryName,
+        d.price,
+        d.sort,
+        d.status,
+        d.image,
+        d.description
+
+        FROM dish d
+
+        LEFT JOIN category c
+        ON d.category_id = c.id
+
+        <where>
+
+            <if test="name != null and name != ''">
+
+                AND d.name LIKE CONCAT('%',#{name},'%')
+
+            </if>
+
+
+            <if test="categoryId != null">
+
+                AND d.category_id = #{categoryId}
+
+            </if>
+
+        </where>
+
+
+        ORDER BY d.sort ASC, d.id DESC
+
+    </select>
+    <select id="count"
+            resultType="java.lang.Long">
+
+        SELECT COUNT(*)
+
+        FROM dish d
+
+        LEFT JOIN category c
+        ON d.category_id = c.id
+
+
+        <where>
+
+            <if test="name != null and name != ''">
+
+                AND d.name LIKE CONCAT('%',#{name},'%')
+
+            </if>
+
+
+            <if test="categoryId != null">
+
+                AND d.category_id=#{categoryId}
+
+            </if>
+
+        </where>
+
+
+    </select>
+
+</mapper>

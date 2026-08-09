@@ -1,0 +1,99 @@
+/*
+  Design tokens — sourced from the restaurant's own world:
+  dark wood counters, amber lamp light, clean prep surfaces.
+*/
+:root {
+  /* Surface palette */
+  --surface-deep: #2c2f36;
+  --surface-deep-soft: #363940;
+  --surface-warm: #f8f6f3;
+  --surface-card: #ffffff;
+  --surface-raised: #fdfcfa;
+
+  /* Accent */
+  --accent: #c8913a;
+  --accent-soft: #d4a45c;
+  --accent-faint: rgba(200, 145, 58, 0.08);
+
+  /* Semantic */
+  --success: #5a8f6a;
+  --success-soft: #e8f5ec;
+  --warning: #c0693a;
+  --warning-soft: #fdf0e8;
+  --danger: #8b3a3a;
+  --danger-soft: #fde8e8;
+  --info: #6b7d8d;
+  --info-soft: #eef1f4;
+
+  /* Text */
+  --text-1: #1a1c20;
+  --text-2: #4a4d54;
+  --text-3: #8a8d94;
+  --text-inverse: #f0ede8;
+
+  /* Borders */
+  --border: #e8e5e0;
+  --border-light: #f0ede8;
+
+  /* Spacing scale (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* Shadows — subtle, warm-toned */
+  --shadow-sm: 0 1px 3px rgba(44, 47, 54, 0.06);
+  --shadow-md: 0 2px 8px rgba(44, 47, 54, 0.08);
+  --shadow-lg: 0 4px 16px rgba(44, 47, 54, 0.1);
+
+  /* Transitions */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration: 0.2s;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-1);
+  background: var(--surface-warm);
+  line-height: 1.6;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar — thin, unobtrusive */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
