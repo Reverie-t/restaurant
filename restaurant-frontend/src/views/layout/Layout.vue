@@ -13,32 +13,32 @@
         :collapse="isCollapse"
         class="side-menu"
       >
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/admin/dashboard">
           <el-icon><HomeFilled /></el-icon>
           <template #title>首页</template>
         </el-menu-item>
 
-        <el-menu-item index="/user">
+        <el-menu-item index="/admin/user">
           <el-icon><User /></el-icon>
           <template #title>用户管理</template>
         </el-menu-item>
 
-        <el-menu-item index="/category">
+        <el-menu-item index="/admin/category">
           <el-icon><Menu /></el-icon>
           <template #title>分类管理</template>
         </el-menu-item>
 
-        <el-menu-item index="/dish">
+        <el-menu-item index="/admin/dish">
           <el-icon><Food /></el-icon>
           <template #title>菜品管理</template>
         </el-menu-item>
 
-        <el-menu-item index="/table">
+        <el-menu-item index="/admin/table">
           <el-icon><Grid /></el-icon>
           <template #title>餐桌管理</template>
         </el-menu-item>
 
-        <el-menu-item index="/order">
+        <el-menu-item index="/admin/order">
           <el-icon><List /></el-icon>
           <template #title>订单管理</template>
         </el-menu-item>

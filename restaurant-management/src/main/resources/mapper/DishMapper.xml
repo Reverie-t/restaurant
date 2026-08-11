@@ -75,5 +75,31 @@
 
 
     </select>
+    <select id="listAllForMenu"
+            resultType="org.example.restaurantmanagement.vo.DishVO">
+
+        SELECT
+            d.id,
+            d.name,
+            d.category_id AS categoryId,
+            c.name AS categoryName,
+            d.price,
+            d.sort,
+            d.image,
+            d.description,
+            d.status
+
+        FROM dish d
+
+                 LEFT JOIN category c
+                           ON d.category_id = c.id
+
+        WHERE d.status = 1
+
+        ORDER BY
+            d.sort ASC,
+            d.id ASC
+
+    </select>
 
 </mapper>

@@ -30,3 +30,9 @@ export function addOrder(data) {
   return request.post("/orders/order", data)
 
 }
+// 顾客查询自己的订单
+export function getMyOrderList() {
+
+  return request.get("/orders/my")
+
+}

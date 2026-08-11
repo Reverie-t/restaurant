@@ -11,6 +11,8 @@ public class DishVO {
 
     private String name;
 
+    private Long categoryId;
+
     private String categoryName;
 
     private BigDecimal price;

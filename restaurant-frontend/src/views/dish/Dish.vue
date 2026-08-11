@@ -382,31 +382,34 @@ const rules = {
 
 function openEdit(row) {
   isEdit.value = true
-  Object.assign(form, JSON.parse(JSON.stringify(row)))
+  const cloned = JSON.parse(JSON.stringify(row))
+
+  // 通过分类名称查找 ID
+  const matched = categoryList.value.find(item => item.name === row.categoryName)
+  cloned.categoryId = matched?.id ?? null
+
+  // 价格、排序转数字
+  cloned.price = Number(cloned.price) || 0
+  cloned.sort = Number(cloned.sort) || 0
+
+  Object.assign(form, cloned)
   dialogVisible.value = true
-}
-// 处理表格多选
-const handleSelectionChange = (selection) => {
-  selectedIds.value = selection.map(item => item.id);
-};
-
-function openAdd(){
-
-  isEdit.value = false
-
-  Object.assign(form,{
-    id:null,
-    name:"",
-    categoryId:null,
-    price:null,
-    sort:0,
-    status:1,
-    description:"",
-    image:""
-  })
-
   formRef.value?.clearValidate()
+}
 
+function openAdd() {
+  isEdit.value = false
+  Object.assign(form, {
+    id: null,
+    name: "",
+    categoryId: null,
+    price: null,
+    sort: 0,
+    status: 1,
+    description: "",
+    image: ""
+  })
+  formRef.value?.clearValidate()
   dialogVisible.value = true
 }
 function beforeUpload(file) {
@@ -637,10 +640,10 @@ async function loadData(){
 
     if(res.data.code===200){
 
+
       tableData.value = res.data.data.records
 
       page.total = res.data.data.total
-
     }
 
 

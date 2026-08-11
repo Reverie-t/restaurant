@@ -115,4 +115,9 @@ public class DishService {
         dishMapper.deleteBatchIds(ids);
 
     }
+    public List<DishVO> listAllForMenu() {
+
+        return dishMapper.listAllForMenu();
+
+    }
 }

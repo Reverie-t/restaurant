@@ -69,5 +69,13 @@ public class DishController {
         return Result.success(null);
 
     }
+    @GetMapping("/dish/menu")
+    public Result<?> menu() {
+
+        return Result.success(
+                dishService.listAllForMenu()
+        );
+
+    }
 
 }

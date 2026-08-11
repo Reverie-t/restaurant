@@ -37,10 +37,23 @@ public class OrdersService {
         return ordersMapper.list(orderType, status);
 
     }
-    public List<OrderDetail> detail(Long orderId){
-        System.out.println(orderDetailMapper.listByOrderId(orderId));
-        return orderDetailMapper.listByOrderId(orderId);
+    public List<OrderVO> listByUserId(Long userId) {
+        System.out.println("查询用户订单：" + userId);
+        return ordersMapper.listByUserId(userId);
 
+    }
+
+    public List<OrderDetail> detail(
+            Long orderId,
+            Long userId
+    ) {
+
+        return ordersMapper
+                .listByOrderIdAndUserId(
+                        orderId,
+                        userId
+
+                );
     }
     @Transactional
     public void updateStatus(Long id, Integer status) {
@@ -94,7 +107,7 @@ public class OrdersService {
     }
 
     @Transactional
-    public void add(OrderAddRequest request) {
+    public void add(OrderAddRequest request,Long userId) {
 
         // =========================
         // ① 计算总金额
@@ -133,11 +146,15 @@ public class OrdersService {
 
         Orders order = new Orders();
 
-        // 订单编号
-        order.setOrderNo(System.currentTimeMillis() + "");
+        order.setOrderNo(
+                System.currentTimeMillis() + ""
+        );
 
-        // 订单类型
-        order.setOrderType(request.getOrderType());
+        order.setOrderType(
+                request.getOrderType()
+        );
+
+        order.setUserId(userId);
 
         // =========================
         // ③ 堂食 → 根据 tableId 查询桌号
@@ -235,6 +252,11 @@ public class OrdersService {
 
             orderDetailMapper.insert(detail);
         }
+    }
+    public List<OrderVO> myList(Long userId) {
+
+        return ordersMapper.myList(userId);
+
     }
 
 

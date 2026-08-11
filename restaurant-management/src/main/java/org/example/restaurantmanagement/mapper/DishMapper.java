@@ -24,5 +24,5 @@ public interface DishMapper extends BaseMapper<Dish> {
             String name,
             Long categoryId
     );
-
+    List<DishVO> listAllForMenu();
 }

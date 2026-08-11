@@ -88,7 +88,7 @@ const handleLogin = async () => {
       localStorage.setItem("token", res.data.data.token)
       localStorage.setItem("user", JSON.stringify(res.data.data.user))
       ElMessage.success("登录成功")
-      router.push("/dashboard")
+      router.push("/admin/dashboard")
     } else {
       ElMessage.error(res.data.message)
     }

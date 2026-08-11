@@ -26,6 +26,8 @@ public class OrderAddRequest {
 
 
 
+
+
     @NotNull
     private List<OrderDetailRequest> details;
 

@@ -15,6 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
 
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
@@ -23,7 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
 
                 .excludePathPatterns(
-                        "/api/login"
+                        "/api/login",
+                        "/api/customer/login"
                 );
     }
     @Override

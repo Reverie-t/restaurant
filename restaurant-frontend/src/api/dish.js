@@ -54,3 +54,8 @@ export function batchDeleteDish(ids){
   )
 
 }
+export function getMenuDishes() {
+
+  return request.get("/dish/menu")
+
+}
