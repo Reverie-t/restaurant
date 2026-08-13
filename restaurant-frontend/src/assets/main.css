@@ -8,9 +8,8 @@
 /* ── Card ── */
 .el-card {
   border: 1px solid var(--border) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-sm) !important;
-  transition: box-shadow var(--duration) var(--ease);
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 .el-card:hover {
@@ -19,40 +18,41 @@
 
 .el-card__header {
   padding: var(--sp-4) var(--sp-5) !important;
-  border-bottom: 1px solid var(--border-light) !important;
+  border-bottom: 1px solid var(--border-faint) !important;
 }
 
 /* ── Table ── */
 .el-table {
-  --el-table-border-color: var(--border-light);
-  --el-table-header-bg-color: var(--surface-raised);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  --el-table-border-color: var(--border-faint);
+  --el-table-header-bg-color: var(--surface-page);
+  border-radius: 0;
 }
 
 .el-table th.el-table__cell {
-  font-weight: 600;
-  color: var(--text-2);
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--text-3);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background: var(--surface-warm);
+  background: var(--surface-page);
 }
 
 /* ── Button ── */
 .el-button--primary {
-  --el-button-bg-color: var(--accent);
-  --el-button-border-color: var(--accent);
-  --el-button-hover-bg-color: var(--accent-soft);
-  --el-button-hover-border-color: var(--accent-soft);
-  --el-button-active-bg-color: #b5802e;
-  --el-button-active-border-color: #b5802e;
+  --el-button-bg-color: var(--btn-primary) !important;
+  --el-button-border-color: var(--btn-primary) !important;
+  --el-button-hover-bg-color: var(--btn-primary-hover) !important;
+  --el-button-hover-border-color: var(--btn-primary-hover) !important;
+  --el-button-active-bg-color: #2d2823 !important;
+  --el-button-active-border-color: #2d2823 !important;
+  border-radius: 0 !important;
 }
 
 .el-button {
-  border-radius: var(--radius-sm) !important;
+  border-radius: 0 !important;
   font-weight: 500;
 }
 
@@ -64,12 +64,12 @@
 
 /* ── Dialog ── */
 .el-dialog {
-  border-radius: var(--radius-lg) !important;
-  overflow: hidden;
+  border-radius: 0 !important;
+  border: 1px solid var(--border);
 }
 
 .el-dialog__header {
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-faint);
   padding: var(--sp-4) var(--sp-5) !important;
   margin: 0 !important;
 }
@@ -79,7 +79,7 @@
 }
 
 .el-dialog__footer {
-  border-top: 1px solid var(--border-light);
+  border-top: 1px solid var(--border-faint);
   padding: var(--sp-3) var(--sp-5) !important;
 }
 
@@ -91,7 +91,7 @@
 
 /* ── Tag ── */
 .el-tag {
-  border-radius: var(--radius-sm) !important;
+  border-radius: 0 !important;
 }
 
 /* ── Menu (sidebar) ── */
@@ -101,7 +101,27 @@
 
 /* ── Input ── */
 .el-input__wrapper {
-  border-radius: var(--radius-sm) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 0 1px var(--border) inset !important;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--text-3) inset !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--text-1) inset !important;
+}
+
+/* ── Select ── */
+.el-select__wrapper {
+  border-radius: 0 !important;
+}
+
+/* ── Switch ── */
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
 }
 
 /* ── Transition for page content ── */

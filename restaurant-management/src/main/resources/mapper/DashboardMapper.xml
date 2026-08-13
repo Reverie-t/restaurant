@@ -70,7 +70,9 @@
 
         dish_name AS dishName,
 
-        SUM(quantity) AS quantity
+        SUM(quantity) AS quantity,
+
+        dish_price AS price
 
         FROM order_detail
 
@@ -85,7 +87,7 @@
 
         )
 
-        GROUP BY dish_id, dish_name
+        GROUP BY dish_id, dish_name,dish_price
 
         ORDER BY quantity DESC
 

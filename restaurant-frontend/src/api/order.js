@@ -11,7 +11,7 @@ export function getOrderList(params){
 }
 export function getOrderDetail(id){
 
-  return request.get("/orders/" + id)
+  return request.get("/orders/"+id ,id )
 
 }
 export function updateOrderStatus(id,status){

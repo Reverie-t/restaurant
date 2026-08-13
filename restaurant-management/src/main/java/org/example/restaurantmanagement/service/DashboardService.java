@@ -7,6 +7,8 @@ import org.example.restaurantmanagement.vo.HotDishVO;
 import org.example.restaurantmanagement.vo.OrderTrendVO;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,8 +24,33 @@ public class DashboardService {
     }
     public List<HotDishVO> hotDishes() {
 
-        return dashboardMapper.hotDishes();
+        // ① 查询热销菜品
+        List<HotDishVO> hotDishes =
+                dashboardMapper.hotDishes();
 
+        // ② 计算每个菜品的销售额
+        if (hotDishes != null) {
+
+            for (HotDishVO hotDish : hotDishes) {
+
+                if (hotDish.getPrice() != null
+                        && hotDish.getQuantity() != null) {
+
+                    BigDecimal amount =
+                            hotDish.getPrice()
+                                    .multiply(
+                                            BigDecimal.valueOf(
+                                                    hotDish.getQuantity()
+                                            )
+                                    );
+
+                    hotDish.setAmount(amount);
+                }
+            }
+        }
+
+        // ③ 返回已经计算好的结果
+        return hotDishes;
     }
     public List<OrderTrendVO> orderTrend() {
 

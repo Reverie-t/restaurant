@@ -42,6 +42,14 @@ public class OrdersService {
         return ordersMapper.listByUserId(userId);
 
     }
+    public List<OrderDetail> detail(Long orderId) {
+
+        return orderDetailMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OrderDetail>()
+                        .eq(OrderDetail::getOrderId, orderId)
+        );
+
+    }
 
     public List<OrderDetail> detail(
             Long orderId,
@@ -58,41 +66,136 @@ public class OrdersService {
     @Transactional
     public void updateStatus(Long id, Integer status) {
 
+        // =========================
+        // ① 查询订单
+        // =========================
 
-        // ① 先查询订单
         Orders oldOrder = ordersMapper.selectById(id);
 
         if (oldOrder == null) {
             throw new RuntimeException("订单不存在");
         }
 
-        // ② 修改订单状态
+
+        // =========================
+        // ② 检查状态是否合法
+        // =========================
+
+        if (status == null ||
+                status < 1 ||
+                status > 5) {
+
+            throw new RuntimeException(
+                    "订单状态不合法"
+            );
+        }
+
+
+        // =========================
+        // ③ 已完成 / 已取消
+        // 不允许再次修改
+        // =========================
+
+        if (oldOrder.getStatus() == 4) {
+
+            throw new RuntimeException(
+                    "订单已经完成，不能修改状态"
+            );
+        }
+
+        if (oldOrder.getStatus() == 5) {
+
+            throw new RuntimeException(
+                    "订单已经取消，不能修改状态"
+            );
+        }
+
+
+        // =========================
+        // ④ 检查正常状态流转
+        // =========================
+
+        Integer oldStatus =
+                oldOrder.getStatus();
+
+        boolean valid = false;
+
+
+        // 待确认 → 制作中
+        if (oldStatus == 1 && status == 2) {
+            valid = true;
+        }
+
+        // 制作中 → 待取餐/待上菜
+        else if (oldStatus == 2 && status == 3) {
+            valid = true;
+        }
+
+        // 待取餐/待上菜 → 已完成
+        else if (oldStatus == 3 && status == 4) {
+            valid = true;
+        }
+
+        // 待确认 → 已取消
+        else if (oldStatus == 1 && status == 5) {
+            valid = true;
+        }
+
+
+        if (!valid) {
+
+            throw new RuntimeException(
+                    "订单状态不能从 "
+                            + oldStatus
+                            + " 修改为 "
+                            + status
+            );
+        }
+
+
+        // =========================
+        // ⑤ 修改状态
+        // =========================
+
         Orders orders = new Orders();
 
         orders.setId(id);
+
         orders.setStatus(status);
-        orders.setUpdateTime(LocalDateTime.now());
 
-        int result = ordersMapper.updateById(orders);
+        orders.setUpdateTime(
+                LocalDateTime.now()
+        );
 
-        System.out.println("数据库更新结果：" + result);
+        int result =
+                ordersMapper.updateById(orders);
+
 
         if (result == 0) {
-            throw new RuntimeException("订单状态修改失败");
+
+            throw new RuntimeException(
+                    "订单状态修改失败"
+            );
         }
 
-        // ③ 如果订单完成，并且是堂食订单
+
+        // =========================
+        // ⑥ 堂食完成 → 释放餐桌
+        // =========================
+
         if (status == 4
                 && oldOrder.getOrderType() == 1
                 && oldOrder.getTableNo() != null) {
 
-            // 根据桌号找到餐桌
-            TableInfo table = tableInfoMapper.selectOne(
-                    new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<TableInfo>()
-                            .eq(TableInfo::getTableNo, oldOrder.getTableNo())
-            );
+            TableInfo table =
+                    tableInfoMapper.selectOne(
+                            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<TableInfo>()
+                                    .eq(
+                                            TableInfo::getTableNo,
+                                            oldOrder.getTableNo()
+                                    )
+                    );
 
-            // ④ 找到餐桌后恢复为空闲
             if (table != null) {
 
                 table.setStatus(0);
@@ -100,12 +203,13 @@ public class OrdersService {
                 tableInfoMapper.updateById(table);
 
                 System.out.println(
-                        "餐桌 " + table.getTableNo() + " 已恢复为空闲"
+                        "餐桌 "
+                                + table.getTableNo()
+                                + " 已恢复为空闲"
                 );
             }
         }
     }
-
     @Transactional
     public void add(OrderAddRequest request,Long userId) {
 
@@ -191,6 +295,7 @@ public class OrdersService {
         // =========================
 
         order.setPickupName(request.getPickupName());
+        order.setPickupPhone(request.getPickupPhone());
 
 
         // =========================

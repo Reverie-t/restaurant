@@ -30,6 +30,11 @@ public class LoginController {
         if (user == null) {
             return Result.error("用户名或密码错误");
         }
+        if (user.getRole().equals("user")) {
+            return Result.error("用户无所需权限");
+
+        }
+
 
         String token = JwtUtils.createToken(
                 user.getId(),

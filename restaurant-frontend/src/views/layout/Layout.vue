@@ -42,6 +42,20 @@
           <el-icon><List /></el-icon>
           <template #title>订单管理</template>
         </el-menu-item>
+
+        <el-menu-item index="/admin/takeaway">
+          <el-icon><TakeawayBox /></el-icon>
+          <template #title>外卖管理</template>
+        </el-menu-item>
+
+        <el-menu-item index="/admin/ingredient">
+          <el-icon><Box /></el-icon>
+          <template #title>原材料管理</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/expense">
+          <el-icon><Money /></el-icon>
+          <template #title>费用管理</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -78,7 +92,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
-  HomeFilled, User, Menu, Food, Grid, List, Fold, Expand
+  HomeFilled, User, Menu, Food, Grid,Money,TakeawayBox,Box, List, Fold, Expand
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -104,22 +118,9 @@ const logout = () => {
 
 /* ── Sidebar ── */
 .aside {
-  background: var(--surface-deep);
+  background: var(--btn-primary);
   transition: width 0.3s var(--ease);
   overflow: hidden;
-  position: relative;
-}
-
-/* The signature element: a single amber line at the very top */
-.aside::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--accent);
-  z-index: 1;
 }
 
 .logo {
@@ -131,10 +132,11 @@ const logout = () => {
 }
 
 .logo-text {
-  color: var(--text-inverse);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  color: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
 }
 
 .logo-collapse .logo-text {
@@ -149,22 +151,21 @@ const logout = () => {
 }
 
 .side-menu .el-menu-item {
-  color: rgba(240, 237, 232, 0.55);
+  color: rgba(255, 255, 255, 0.5);
   height: 44px;
   line-height: 44px;
   margin: 2px 8px;
-  border-radius: var(--radius-md);
   font-size: 14px;
 }
 
 .side-menu .el-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-inverse);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .side-menu .el-menu-item.is-active {
-  background: var(--accent);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
 /* ── Header ── */
@@ -173,7 +174,7 @@ const logout = () => {
   align-items: center;
   justify-content: space-between;
   background: var(--surface-card);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-light);
   padding: 0 var(--sp-6);
   height: 56px;
 }
@@ -196,7 +197,7 @@ const logout = () => {
 }
 
 .welcome-text {
-  color: var(--text-2);
+  color: var(--text-3);
   font-size: 14px;
 }
 
@@ -207,7 +208,7 @@ const logout = () => {
 }
 
 .user-avatar {
-  background: var(--accent);
+  background: var(--btn-primary);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -221,8 +222,8 @@ const logout = () => {
 
 /* ── Content ── */
 .main-content {
-  background: var(--surface-warm);
-  padding: var(--sp-5);
+  background: var(--surface-page);
+  padding: 0;
   overflow-y: auto;
 }
 </style>

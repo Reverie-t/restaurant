@@ -1,59 +1,40 @@
 <template>
   <div class="login-page">
-    <!-- Left: brand panel -->
-    <div class="login-brand">
-      <div class="brand-content">
-        <div class="brand-icon">
-          <el-icon :size="32"><KnifeFork /></el-icon>
-        </div>
-        <h1 class="brand-title">餐馆管理系统</h1>
-        <p class="brand-desc">Restaurant Management</p>
-        <div class="brand-divider"></div>
-        <p class="brand-tagline">高效运营，从这里开始</p>
-      </div>
-    </div>
+    <div class="login-card">
+      <div class="eyebrow">RESTAURANT MANAGEMENT</div>
+      <h1 class="login-title">餐馆管理系统</h1>
+      <p class="login-desc">请登录您的账号以继续</p>
 
-    <!-- Right: form -->
-    <div class="login-form-wrap">
-      <div class="form-card">
-        <h2>欢迎回来</h2>
-        <p class="form-hint">请登录您的账号以继续</p>
+      <el-form :model="form" class="login-form">
+        <el-form-item>
+          <el-input
+            v-model="form.username"
+            placeholder="用户名"
+            size="large"
+          />
+        </el-form-item>
 
-        <el-form :model="form" class="login-form">
-          <el-form-item>
-            <el-input
-              v-model="form.username"
-              placeholder="用户名"
-              size="large"
-              :prefix-icon="User"
-            />
-          </el-form-item>
+        <el-form-item>
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="密码"
+            size="large"
+            show-password
+            @keyup.enter="handleLogin"
+          />
+        </el-form-item>
 
-          <el-form-item>
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="密码"
-              size="large"
-              show-password
-              :prefix-icon="Lock"
-              @keyup.enter="handleLogin"
-            />
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              size="large"
-              class="login-btn"
-              @click="handleLogin"
-              :loading="loading"
-            >
-              登 录
-            </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
+        <el-form-item>
+          <button
+            class="login-btn"
+            @click="handleLogin"
+            :disabled="loading"
+          >
+            {{ loading ? '登录中...' : '登 录' }}
+          </button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
@@ -63,7 +44,6 @@ import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { login } from '@/api/login'
-import { User, Lock, KnifeFork } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -104,119 +84,86 @@ const handleLogin = async () => {
 .login-page {
   width: 100vw;
   height: 100vh;
-  display: flex;
-}
-
-/* ── Left brand panel ── */
-.login-brand {
-  width: 420px;
-  background: var(--surface-deep);
+  background: var(--surface-page);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  flex-shrink: 0;
 }
 
-/* Signature amber line */
-.login-brand::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 3px;
-  height: 100%;
-  background: var(--accent);
-}
-
-.brand-content {
-  text-align: center;
-  padding: var(--sp-8);
-}
-
-.brand-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto var(--sp-6);
-  background: var(--accent);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-}
-
-.brand-title {
-  color: var(--text-inverse);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  margin-bottom: var(--sp-2);
-}
-
-.brand-desc {
-  color: rgba(240, 237, 232, 0.4);
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.brand-divider {
-  width: 40px;
-  height: 2px;
-  background: var(--accent);
-  margin: var(--sp-6) auto;
-  border-radius: 1px;
-}
-
-.brand-tagline {
-  color: rgba(240, 237, 232, 0.5);
-  font-size: 14px;
-}
-
-/* ── Right form area ── */
-.login-form-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-warm);
-}
-
-.form-card {
+.login-card {
   width: 380px;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  padding: 48px 40px 40px;
 }
 
-.form-card h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-1);
-  margin-bottom: var(--sp-2);
-}
-
-.form-hint {
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
   color: var(--text-3);
-  font-size: 14px;
-  margin-bottom: var(--sp-8);
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
+.login-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text-1);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.login-desc {
+  font-size: 14px;
+  color: var(--text-3);
+  margin-bottom: 36px;
+}
+
+/* Input style overrides */
 .login-form :deep(.el-input__wrapper) {
   box-shadow: 0 0 0 1px var(--border) inset;
-  border-radius: var(--radius-md);
+  border-radius: 0;
+  background: var(--surface-card);
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0bbb4 inset;
+  box-shadow: 0 0 0 1px var(--text-3) inset;
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px var(--accent) inset;
+  box-shadow: 0 0 0 1px var(--text-1) inset;
 }
 
+.login-form :deep(.el-input__inner) {
+  color: var(--text-1);
+  font-size: 14px;
+}
+
+.login-form :deep(.el-input__inner::placeholder) {
+  color: var(--text-4);
+}
+
+/* Primary button — dark wood */
 .login-btn {
   width: 100%;
   height: 44px;
-  font-size: 15px;
-  margin-top: var(--sp-2);
+  background: var(--btn-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-top: 4px;
+  transition: background 0.2s var(--ease);
+}
+
+.login-btn:hover {
+  background: var(--btn-primary-hover);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

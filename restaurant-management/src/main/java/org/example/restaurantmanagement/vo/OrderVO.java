@@ -43,6 +43,8 @@ public class OrderVO {
 
     private String pickupName;
 
+    private String pickupPhone;
+
 
     private LocalDateTime createTime;
 

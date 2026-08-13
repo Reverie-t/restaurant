@@ -1,62 +1,59 @@
 <template>
-  <div class="dashboard">
+  <div class="page">
 
-    <!-- Stat cards -->
-    <el-row :gutter="16">
-      <el-col :span="6" v-for="item in statCards" :key="item.key">
-        <div class="stat-card" :class="'stat-' + item.key">
-          <div class="stat-label">{{ item.label }}</div>
-          <div class="stat-value">{{ statistics[item.key] }}</div>
-          <div class="stat-sub">{{ item.sub }}</div>
-        </div>
-      </el-col>
-    </el-row>
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">DASHBOARD</div>
+        <h1 class="page-title">首页</h1>
+        <p class="page-desc">今日餐厅运营数据概览</p>
+      </div>
+    </div>
 
-    <!-- Hot dishes -->
-    <el-card class="section-card">
-      <template #header>
-        <div class="section-header">
-          <span class="section-title">今日热销菜品 TOP 5</span>
-        </div>
-      </template>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card" v-for="item in statCards" :key="item.key">
+        <span>{{ item.label }}</span>
+        <strong>{{ statistics[item.key] }}</strong>
+      </div>
+    </div>
+
+    <!-- Hot Dishes -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">今日热销菜品 TOP 5</span>
+      </div>
 
       <el-table :data="hotDishes" :show-header="true" size="default">
         <el-table-column type="index" label="排名" width="70">
           <template #default="scope">
-            <span v-if="scope.$index < 3" class="rank-medal">
-              {{ ['🥇','🥈','🥉'][scope.$index] }}
-            </span>
-            <span v-else class="rank-num">{{ scope.$index + 1 }}</span>
+            <span class="rank-num">{{ scope.$index + 1 }}</span>
           </template>
         </el-table-column>
 
         <el-table-column prop="dishName" label="菜品名称" />
 
-        <el-table-column prop="quantity" label="销量" width="110">
+        <el-table-column prop="quantity" label="销量" width="120">
           <template #default="scope">
-            <el-tag size="small" type="success" effect="plain" round>
-              {{ scope.row.quantity }} 份
-            </el-tag>
+            <span class="cell-sub">{{ scope.row.quantity }} 份</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="totalAmount" label="总额" width="120">
+        <el-table-column prop="amount" label="总额" width="140">
           <template #default="scope">
-            <span class="amount-text">¥{{ (scope.row.totalAmount || 0).toFixed(2) }}</span>
+            <span class="amount">¥{{ (scope.row.amount || 0).toFixed(2) }}</span>
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
+    </div>
 
-    <!-- Trend chart -->
-    <el-card class="section-card">
-      <template #header>
-        <div class="section-header">
-          <span class="section-title">今日营业趋势</span>
-        </div>
-      </template>
+    <!-- Trend Chart -->
+    <div class="card" style="margin-top: 24px;">
+      <div class="card-header">
+        <span class="card-title">今日营业趋势</span>
+      </div>
       <div ref="trendRef" style="width:100%;height:380px"></div>
-    </el-card>
+    </div>
 
   </div>
 </template>
@@ -80,10 +77,10 @@ const statistics = ref({
 })
 
 const statCards = [
-  { key: "todayOrderCount",      label: "今日订单",  sub: "笔" },
-  { key: "todayAmount",          label: "今日营业额", sub: "元" },
-  { key: "todayDineInCount",     label: "堂食订单",  sub: "笔" },
-  { key: "todayTakeoutCount",    label: "外带订单",  sub: "笔" },
+  { key: "todayOrderCount",   label: "今日订单" },
+  { key: "todayAmount",       label: "今日营业额" },
+  { key: "todayDineInCount",  label: "堂食订单" },
+  { key: "todayTakeoutCount", label: "外带订单" },
 ]
 
 async function loadOrderTrend() {
@@ -125,30 +122,30 @@ function renderChart() {
       data: ["订单数", "营业额"],
       right: 0,
       top: 0,
-      textStyle: { color: '#8a8d94', fontSize: 12 }
+      textStyle: { color: '#8b8176', fontSize: 12 }
     },
     grid: { left: 48, right: 48, top: 40, bottom: 28 },
     xAxis: {
       type: "category",
       data: orderTrend.value.map(i => i.time),
-      axisLine: { lineStyle: { color: '#e8e5e0' } },
+      axisLine: { lineStyle: { color: '#e4ddd5' } },
       axisTick: { show: false },
-      axisLabel: { color: '#8a8d94', fontSize: 12 }
+      axisLabel: { color: '#8b8176', fontSize: 12 }
     },
     yAxis: [
       {
         type: "value",
         name: "订单数",
-        splitLine: { lineStyle: { color: '#f0ede8', type: 'dashed' } },
-        axisLabel: { color: '#8a8d94', fontSize: 12 },
-        nameTextStyle: { color: '#8a8d94', fontSize: 12 }
+        splitLine: { lineStyle: { color: '#eee9e4', type: 'dashed' } },
+        axisLabel: { color: '#8b8176', fontSize: 12 },
+        nameTextStyle: { color: '#8b8176', fontSize: 12 }
       },
       {
         type: "value",
         name: "营业额",
         splitLine: { show: false },
-        axisLabel: { color: '#8a8d94', fontSize: 12 },
-        nameTextStyle: { color: '#8a8d94', fontSize: 12 }
+        axisLabel: { color: '#8b8176', fontSize: 12 },
+        nameTextStyle: { color: '#8b8176', fontSize: 12 }
       }
     ],
     series: [
@@ -157,14 +154,14 @@ function renderChart() {
         type: "line",
         smooth: true,
         symbol: 'circle',
-        symbolSize: 6,
+        symbolSize: 5,
         data: orderTrend.value.map(i => i.orderCount),
-        lineStyle: { color: '#c8913a', width: 2 },
-        itemStyle: { color: '#c8913a', borderWidth: 2, borderColor: '#fff' },
+        lineStyle: { color: '#3d3731', width: 2 },
+        itemStyle: { color: '#3d3731', borderWidth: 2, borderColor: '#fff' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(200, 145, 58, 0.15)' },
-            { offset: 1, color: 'rgba(200, 145, 58, 0.01)' }
+            { offset: 0, color: 'rgba(61, 55, 49, 0.08)' },
+            { offset: 1, color: 'rgba(61, 55, 49, 0.01)' }
           ])
         }
       },
@@ -172,14 +169,11 @@ function renderChart() {
         name: "营业额",
         type: "bar",
         yAxisIndex: 1,
-        barWidth: 20,
+        barWidth: 18,
         data: orderTrend.value.map(i => i.amount),
         itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#5a8f6a' },
-            { offset: 1, color: '#7ab588' }
-          ]),
-          borderRadius: [3, 3, 0, 0]
+          color: '#d8d0c7',
+          borderRadius: [2, 2, 0, 0]
         }
       }
     ]
@@ -194,96 +188,131 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dashboard {
-  padding: 0;
+.page {
+  padding: 36px 42px;
+  min-height: 100%;
+  background: var(--surface-page);
 }
 
-/* ── Stat cards ── */
-.stat-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--sp-5);
-  position: relative;
-  overflow: hidden;
-  transition: box-shadow var(--duration) var(--ease);
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 32px;
 }
 
-.stat-card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* Left accent border — the one bold move */
-.stat-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-}
-
-.stat-todayOrderCount::before   { background: var(--accent); }
-.stat-todayAmount::before       { background: var(--success); }
-.stat-todayDineInCount::before  { background: var(--warning); }
-.stat-todayTakeoutCount::before { background: var(--info); }
-
-.stat-label {
-  font-size: 13px;
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
   color: var(--text-3);
-  margin-bottom: var(--sp-2);
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
+.page-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 36px;
+  font-weight: 500;
   color: var(--text-1);
+  margin-bottom: 4px;
   line-height: 1.2;
 }
 
-.stat-sub {
-  font-size: 12px;
+.page-desc {
+  font-size: 14px;
   color: var(--text-3);
-  margin-top: var(--sp-1);
 }
 
-/* ── Section cards ── */
-.section-card {
-  margin-top: var(--sp-5);
+/* ── Stats ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.stat-card {
+  background: #fff;
+  padding: 22px;
+  border: 1px solid var(--border-light);
 }
 
-.section-title {
-  font-size: 15px;
-  font-weight: 600;
+.stat-card span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-4);
+  margin-bottom: 10px;
+}
+
+.stat-card strong {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 500;
   color: var(--text-1);
 }
 
-/* ── Ranking ── */
-.rank-medal {
-  font-size: 18px;
+/* ── Card ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 0;
 }
 
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-faint);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+/* ── Table ── */
+.card :deep(.el-table) {
+  border: none;
+}
+
+.card :deep(.el-table th.el-table__cell) {
+  background: #fff;
+}
+
+/* ── Ranking ── */
 .rank-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-3);
-  background: var(--surface-warm);
 }
 
-.amount-text {
-  font-weight: 600;
-  color: var(--danger);
+.cell-sub {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.amount {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 24px 18px;
+  }
 }
 </style>

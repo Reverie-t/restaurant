@@ -19,6 +19,10 @@ import CustomerLogin
   from "@/views/customer/CustomerLogin.vue"
 import CustomerOrders
   from "@/views/customer/CustomerOrders.vue"
+import Takeaway from "@/views/takeaway/Takeaway.vue"
+import Ingredient
+  from "@/views/ingredient/Ingredient.vue"
+import Expense from "@/views/expense/Expense.vue"
 
 const router = createRouter({
 
@@ -111,6 +115,15 @@ const router = createRouter({
         {
           path: 'table',
           component: Table
+        },{
+          path: "takeaway",
+          component: Takeaway
+        },{
+          path: "ingredient",
+          component: Ingredient
+        },{
+          path: "expense",
+          component: Expense
         }
 
       ]

@@ -39,6 +39,8 @@
 
         pickup_name AS pickupName,
 
+        pickup_phone As pickupPhone,
+
         create_time AS createTime
 
         FROM orders

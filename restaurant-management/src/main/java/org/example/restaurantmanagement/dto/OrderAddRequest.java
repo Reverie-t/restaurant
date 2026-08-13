@@ -24,6 +24,8 @@ public class OrderAddRequest {
 
     private String pickupName;
 
+    private String pickupPhone;
+
 
 
 

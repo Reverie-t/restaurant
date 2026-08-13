@@ -34,7 +34,7 @@
         </button>
 
 
-        <!-- 登录 -->
+        <!-- 顾客登录 -->
 
         <button
           v-if="!customer"
@@ -52,7 +52,17 @@
           class="customer-button"
           @click="goOrders"
         >
-          {{ customer.realName || "顾客" }}
+          {{  "订单管理" }}
+        </button>
+
+
+        <!-- 管理后台登录 -->
+
+        <button
+          class="admin-button"
+          @click="goLogin1"
+        >
+          登录
         </button>
 
       </div>
@@ -294,13 +304,13 @@
 
 
         <h1>
-          好好吃饭，<br>
-          认真生活。
+          懂你的味蕾<br>
+          更懂你的品味
         </h1>
 
 
         <p class="hero-description">
-          一顿饭，不只是填饱肚子。
+          每一餐，都是一场值得期待的仪式。
         </p>
 
 
@@ -366,8 +376,8 @@
           </p>
 
           <h2>
-            一顿好的饭，<br>
-            值得认真对待。
+            把平凡的日子，<br>
+            盛进精致的餐盘里
           </h2>
 
         </div>
@@ -522,7 +532,7 @@
           </p>
 
           <h2>
-            不只是来吃饭。
+            懂美食，更懂你
           </h2>
 
         </div>
@@ -554,7 +564,7 @@
 
 
         <h2>
-          欢迎来吃饭。
+          欢迎体验
         </h2>
 
 
@@ -783,20 +793,14 @@ onMounted(() => {
 // =========================
 
 function goLogin1() {
+  // 拿到当前页面的完整路径（比如 /dish/101）
+  const currentPath = router.currentRoute.value.fullPath;
 
+  // 跳转到登录页，并通过 query 参数携带“来源地址”
   router.push({
-
-    path:
-      "/customer/login",
-
-    query: {
-
-      redirect: "/"
-
-    }
-
-  })
-
+    path: "/customer/login",
+    query: { redirect: currentPath }
+  });
 }
 
 
@@ -1090,6 +1094,37 @@ button {
   border-left:
     1px solid
     rgba(255,255,255,.45);
+
+}
+
+
+.admin-button {
+
+  padding: 8px 20px;
+
+  border: 1px solid
+    rgba(255,255,255,.5);
+
+  background: transparent;
+
+  color: white;
+
+  font-size: 11px;
+
+  letter-spacing: 2px;
+
+  transition:
+    background .3s,
+    color .3s;
+
+}
+
+
+.admin-button:hover {
+
+  background: white;
+
+  color: #1d1d1b;
 
 }
 
@@ -2348,6 +2383,15 @@ footer {
   .customer-button {
 
     font-size: 12px;
+
+  }
+
+
+  .admin-button {
+
+    font-size: 9px;
+
+    padding: 6px 14px;
 
   }
 

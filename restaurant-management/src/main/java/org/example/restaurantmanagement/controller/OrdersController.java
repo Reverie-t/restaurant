@@ -49,7 +49,9 @@ public class OrdersController {
                 .getAttribute("userId"))
                 .longValue();
 
-        System.out.println("查询我的订单，用户ID：" + userId);
+        System.out.println(
+                "查询我的订单，用户ID：" + userId
+        );
 
         return Result.success(
                 ordersService.listByUserId(userId)
@@ -59,14 +61,43 @@ public class OrdersController {
 
     /**
      * ============================
-     * 查询订单详情
+     * 管理员查询订单详情
+     * 可以查看任意订单
      * ============================
      */
-    @GetMapping("/{id}")public Result<?> detail(@PathVariable Long id,HttpServletRequest httpRequest) {
+    @GetMapping("/{id}")
+    public Result<?> detail(
+            @PathVariable Long id
+    ) {
 
-        Long userId = ((Number) httpRequest
+        return Result.success(
+                ordersService.detail(id)
+        );
+    }
+
+
+    /**
+     * ============================
+     * 顾客查询自己的订单详情
+     * 只能查看属于自己的订单
+     * ============================
+     */
+    @GetMapping("/my/{id}")
+    public Result<?> myDetail(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+
+        Long userId = ((Number) request
                 .getAttribute("userId"))
                 .longValue();
+
+        System.out.println(
+                "查询我的订单详情，用户ID："
+                        + userId
+                        + "，订单ID："
+                        + id
+        );
 
         return Result.success(
                 ordersService.detail(id, userId)
@@ -77,6 +108,7 @@ public class OrdersController {
     /**
      * ============================
      * 修改订单状态
+     * 管理员使用
      * ============================
      */
     @PutMapping("/status")
@@ -96,6 +128,7 @@ public class OrdersController {
     /**
      * ============================
      * 创建订单
+     * 顾客使用
      * ============================
      */
     @PostMapping("/order")
@@ -108,9 +141,14 @@ public class OrdersController {
                 .getAttribute("userId"))
                 .longValue();
 
-        System.out.println("当前登录用户ID：" + userId);
+        System.out.println(
+                "当前登录用户ID：" + userId
+        );
 
-        ordersService.add(request, userId);
+        ordersService.add(
+                request,
+                userId
+        );
 
         return Result.success(null);
     }

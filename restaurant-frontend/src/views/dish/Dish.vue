@@ -1,90 +1,49 @@
 <template>
+  <div class="page">
 
-  <div class="dish-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">DISH</div>
+        <h1 class="page-title">菜品管理</h1>
+        <p class="page-desc">管理菜单中的所有菜品信息</p>
+      </div>
+      <el-button type="primary" @click="openAdd">新增菜品</el-button>
+    </div>
 
-    <el-card>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <el-input
+        v-model="searchForm.name"
+        placeholder="输入菜品名称搜索"
+        clearable
+        style="width: 220px;"
+        @keyup.enter="search"
+      />
+      <el-select
+        v-model="searchForm.categoryId"
+        placeholder="选择分类"
+        clearable
+        style="width: 160px;"
+      >
+        <el-option
+          v-for="item in categoryList"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        />
+      </el-select>
+      <el-button type="primary" @click="search">查询</el-button>
+      <el-button @click="resetSearch">重置</el-button>
+      <el-button type="danger" @click="batchRemove" :disabled="selectedIds.length === 0">
+        批量删除
+      </el-button>
+    </div>
 
-      <template #header>
-
-        <div class="header">
-
-          <span>菜品管理</span>
-
-          <el-button
-            type="primary"
-            @click="openAdd"
-          >
-            新增菜品
-          </el-button>
-
-        </div>
-
-      </template>
-
-      <!-- 查询区域 -->
-
-      <el-row :gutter="20" style="margin-bottom:20px">
-
-        <el-col :span="6">
-
-          <el-input
-            v-model="searchForm.name"
-            placeholder="请输入菜品名称"
-            clearable
-          />
-
-        </el-col>
-
-        <el-col :span="6">
-
-          <el-select
-            v-model="searchForm.categoryId"
-            placeholder="请选择分类"
-            clearable
-            style="width:100%"
-          >
-
-            <el-option
-              v-for="item in categoryList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-
-          </el-select>
-
-        </el-col>
-
-        <el-col :span="12">
-
-          <el-button
-            type="primary"
-            @click="search"
-          >
-            查询
-          </el-button>
-
-          <el-button
-            @click="resetSearch"
-          >
-            重置
-          </el-button>
-
-          <el-button
-            type="danger"
-            @click="batchRemove"
-          >
-            批量删除
-          </el-button>
-
-        </el-col>
-
-      </el-row>
-
-      <!-- 表格 -->
+    <!-- Content -->
+    <div class="card">
       <el-table
         :data="tableData"
-        stripe
         v-loading="loading"
         @selection-change="handleSelectionChange"
       >
@@ -94,16 +53,10 @@
           <template #default="scope">
             <div class="dish-cell">
               <el-image
-                :src="scope.row.image
-                   ? 'http://localhost:8080' + scope.row.image
-                   : '/images/default-dish.png'"
+                :src="scope.row.image ? 'http://localhost:8080' + scope.row.image : '/images/default-dish.png'"
                 class="dish-img"
                 fit="cover"
-                :preview-src-list="[
-                  scope.row.image
-                    ? 'http://localhost:8080' + scope.row.image
-                    : '/images/default-dish.png'
-                ]"
+                :preview-src-list="[scope.row.image ? 'http://localhost:8080' + scope.row.image : '/images/default-dish.png']"
                 preview-teleported
               />
               <div class="dish-info">
@@ -138,84 +91,55 @@
 
         <el-table-column label="操作" width="140" align="center">
           <template #default="scope">
-            <el-button link type="primary" @click="openEdit(scope.row)">
-              编辑
-            </el-button>
-            <el-button link type="danger" @click="remove(scope.row)">
-              删除
-            </el-button>
+            <button class="action-btn action-edit" @click="openEdit(scope.row)">编辑</button>
+            <button class="action-btn action-del" @click="remove(scope.row)">删除</button>
           </template>
         </el-table-column>
       </el-table>
+
       <div class="pagination">
-
         <el-pagination
-
           v-model:current-page="page.pageNum"
-
           v-model:page-size="page.pageSize"
-
           :page-sizes="[5,10,20,50]"
-
           layout="total, sizes, prev, pager, next, jumper"
-
           :total="page.total"
-
           @size-change="loadData"
-
           @current-change="loadData"
-
         />
-
       </div>
+    </div>
 
-
-    </el-card>
+    <!-- Dialog -->
     <el-dialog
       v-model="dialogVisible"
       :title="isEdit ? '编辑菜品' : '新增菜品'"
-      width="600px"
+      width="560px"
+      :close-on-click-modal="false"
     >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="90px"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
 
         <el-form-item label="菜品名称" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
-        <el-form-item label="菜品图片">
 
+        <el-form-item label="菜品图片">
           <el-upload
             :show-file-list="false"
             :before-upload="beforeUpload"
             :http-request="uploadFile"
           >
-
             <img
               v-if="form.image"
               :src="'http://localhost:8080' + form.image"
-              style="width:120px;height:120px;border-radius:6px"
+              style="width: 100px; height: 100px; object-fit: cover;"
             />
-
-            <el-button
-              v-else
-              type="primary"
-            >
-              上传图片
-            </el-button>
-
+            <el-button v-else type="primary">上传图片</el-button>
           </el-upload>
-
         </el-form-item>
 
         <el-form-item label="所属分类" prop="categoryId">
-          <el-select
-            v-model="form.categoryId"
-            style="width:100%"
-          >
+          <el-select v-model="form.categoryId" style="width: 100%;">
             <el-option
               v-for="item in categoryList"
               :key="item.id"
@@ -231,16 +155,12 @@
             :min="0.01"
             :precision="2"
             :step="1"
-            style="width:100%"
+            style="width: 100%;"
           />
         </el-form-item>
 
         <el-form-item label="排序" prop="sort">
-          <el-input-number
-            v-model="form.sort"
-            :min="0"
-            style="width:100%"
-          />
+          <el-input-number v-model="form.sort" :min="0" style="width: 100%;" />
         </el-form-item>
 
         <el-form-item label="状态">
@@ -254,7 +174,7 @@
           <el-input
             type="textarea"
             v-model="form.description"
-            :rows="4"
+            :rows="3"
             maxlength="500"
             show-word-limit
           />
@@ -263,135 +183,55 @@
       </el-form>
 
       <template #footer>
-
-        <el-button @click="dialogVisible=false">
-          取消
-        </el-button>
-
-        <el-button
-          type="primary"
-          @click="saveDish"
-        >
-          保存
-        </el-button>
-
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveDish">保存</el-button>
       </template>
-
     </el-dialog>
-  </div>
 
+  </div>
 </template>
 
 <script setup>
-
-import {ref, reactive, onMounted} from "vue"
+import { ref, reactive, onMounted } from 'vue'
 import {
-  getDishList,
-  getSimpleCategory,
-  addDish,
-  updateDish,
-  deleteDish,
-  updateDishStatus,
-  batchDeleteDish
+  getDishList, getSimpleCategory, addDish, updateDish,
+  deleteDish, updateDishStatus, batchDeleteDish
 } from '@/api/dish'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { uploadImage } from "@/api/upload"
+import { uploadImage } from '@/api/upload'
 
 const tableData = ref([])
-const page = reactive({
-
-  pageNum:1,
-
-  pageSize:10,
-
-  total:0
-
-})
-
+const page = reactive({ pageNum: 1, pageSize: 10, total: 0 })
 const loading = ref(false)
-
 const categoryList = ref([])
-
-const searchForm = reactive({
-
-  name: "",
-
-  categoryId: null
-
-})
+const searchForm = reactive({ name: '', categoryId: null })
 const dialogVisible = ref(false)
-
 const isEdit = ref(false)
-
 const formRef = ref()
-
 const selectedIds = ref([])
 
 const form = reactive({
-  id: null,
-  name: "",
-  categoryId: null,
-  price: null,
-  sort: 0,
-  status: 1,
-  description: "",
-  image: ""
+  id: null, name: '', categoryId: null, price: null,
+  sort: 0, status: 1, description: '', image: ''
 })
 
 const rules = {
-
   name: [
-    {
-      required: true,
-      message: "请输入菜品名称",
-      trigger: "blur"
-    },
-    {
-      min: 2,
-      max: 50,
-      message: "菜品名称长度为2~50个字符",
-      trigger: "blur"
-    }
+    { required: true, message: '请输入菜品名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '菜品名称长度为2~50个字符', trigger: 'blur' }
   ],
-
-  categoryId: [
-    {
-      required: true,
-      message: "请选择分类",
-      trigger: "change"
-    }
-  ],
-
-  price: [
-    {
-      required: true,
-      message: "请输入价格",
-      trigger: "blur"
-    }
-  ],
-
-  sort: [
-    {
-      required: true,
-      message: "请输入排序",
-      trigger: "blur"
-    }
-  ]
-
+  categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
+  price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
+  sort: [{ required: true, message: '请输入排序', trigger: 'blur' }]
 }
 
 function openEdit(row) {
   isEdit.value = true
   const cloned = JSON.parse(JSON.stringify(row))
-
-  // 通过分类名称查找 ID
   const matched = categoryList.value.find(item => item.name === row.categoryName)
   cloned.categoryId = matched?.id ?? null
-
-  // 价格、排序转数字
   cloned.price = Number(cloned.price) || 0
   cloned.sort = Number(cloned.sort) || 0
-
   Object.assign(form, cloned)
   dialogVisible.value = true
   formRef.value?.clearValidate()
@@ -400,304 +240,189 @@ function openEdit(row) {
 function openAdd() {
   isEdit.value = false
   Object.assign(form, {
-    id: null,
-    name: "",
-    categoryId: null,
-    price: null,
-    sort: 0,
-    status: 1,
-    description: "",
-    image: ""
+    id: null, name: '', categoryId: null, price: null,
+    sort: 0, status: 1, description: '', image: ''
   })
   formRef.value?.clearValidate()
   dialogVisible.value = true
 }
+
 function beforeUpload(file) {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  const isAllowed = allowedTypes.includes(file.type);
-
-  if (!isAllowed) {
-    ElMessage.error('仅支持 jpg、jpeg、png、webp 格式的图片');
-    return false;
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    ElMessage.error('仅支持 jpg、jpeg、png、webp 格式的图片')
+    return false
   }
-
-  // 顺便加上大小限制（和后端 5MB 对齐）
-  const isLt5M = file.size / 1024 / 1024 < 5;
-  if (!isLt5M) {
-    ElMessage.error('图片大小不能超过 5MB');
-    return false;
+  if (file.size / 1024 / 1024 >= 5) {
+    ElMessage.error('图片大小不能超过 5MB')
+    return false
   }
-
-  return true;
-}
-async function remove(row){
-
-  try{
-
-    await ElMessageBox.confirm(
-
-      "确定删除该菜品？",
-
-      "提示",
-
-      {
-        type:"warning"
-      }
-
-    )
-
-    const res = await deleteDish(row.id)
-
-    if(res.data.code==200){
-
-      ElMessage.success("删除成功")
-
-      loadData()
-
-    }else{
-
-      ElMessage.error(res.data.message)
-
-    }
-
-  }catch{
-
-  }
-
-}
-async function changeStatus(row){
-
-  const res = await updateDishStatus(
-
-    row.id,
-
-    row.status
-
-  )
-
-  if(res.data.code===200){
-
-    ElMessage.success("状态修改成功")
-
-  }else{
-
-    ElMessage.error(res.data.message)
-
-    loadData()
-
-  }
-
+  return true
 }
 
-async function uploadFile(option){
-
+async function uploadFile(option) {
   const res = await uploadImage(option.file)
-
-  if(res.data.code===200){
-
+  if (res.data.code === 200) {
     form.image = res.data.data
-
-    ElMessage.success("上传成功")
-
-  }else{
-
+    ElMessage.success('上传成功')
+  } else {
     ElMessage.error(res.data.message)
-
   }
-
 }
 
-function search(){
-
-  page.pageNum=1
-
-  loadData()
-
+async function remove(row) {
+  try {
+    await ElMessageBox.confirm('确定删除该菜品？', '提示', { type: 'warning' })
+    const res = await deleteDish(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('删除成功')
+      loadData()
+    } else {
+      ElMessage.error(res.data.message)
+    }
+  } catch { }
 }
 
-function resetSearch(){
+async function changeStatus(row) {
+  const res = await updateDishStatus(row.id, row.status)
+  if (res.data.code === 200) {
+    ElMessage.success('状态修改成功')
+  } else {
+    ElMessage.error(res.data.message)
+    loadData()
+  }
+}
 
-  searchForm.name=""
-
-  searchForm.categoryId=null
-
-  page.pageNum=1
-
+function search() {
+  page.pageNum = 1
   loadData()
+}
 
+function resetSearch() {
+  searchForm.name = ''
+  searchForm.categoryId = null
+  page.pageNum = 1
+  loadData()
+}
+
+function handleSelectionChange(rows) {
+  selectedIds.value = rows.map(r => r.id)
+}
+
+async function batchRemove() {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请选择要删除的菜品')
+    return
+  }
+  try {
+    await ElMessageBox.confirm('确定删除选中的菜品吗？', '提示', { type: 'warning' })
+    const res = await batchDeleteDish(selectedIds.value)
+    if (res.data.code === 200) {
+      ElMessage.success('删除成功')
+      loadData()
+    }
+  } catch { }
 }
 
 async function saveDish() {
-
   const valid = await formRef.value.validate().catch(() => false)
-
-  if (!valid) {
-    return
-  }
-
-  let res
-
-  if (isEdit.value) {
-
-    res = await updateDish(form)
-
-  } else {
-
-    res = await addDish(form)
-
-  }
-
-  if (res.data.code == 200) {
-
-    ElMessage.success(isEdit.value ? "修改成功" : "新增成功")
-
+  if (!valid) return
+  const res = isEdit.value ? await updateDish(form) : await addDish(form)
+  if (res.data.code === 200) {
+    ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
     dialogVisible.value = false
-
     loadData()
-
   } else {
-
     ElMessage.error(res.data.message)
-
   }
-
 }
-async function loadCategory(){
 
+async function loadCategory() {
   const res = await getSimpleCategory()
-
-  if(res.data.code===200){
-
-    categoryList.value=res.data.data
-
+  if (res.data.code === 200) {
+    categoryList.value = res.data.data
   }
-
 }
-async function batchRemove(){
 
-  if(selectedIds.value.length===0){
-
-    ElMessage.warning(
-      "请选择要删除的菜品"
-    )
-
-    return
-
-  }
-
-
-  try{
-
-    await ElMessageBox.confirm(
-      "确定删除选中的菜品吗？",
-      "提示",
-      {
-        type:"warning"
-      }
-    )
-
-
-    const res =
-      await batchDeleteDish(
-        selectedIds.value
-      )
-
-
-    if(res.data.code===200){
-
-      ElMessage.success(
-        "删除成功"
-      )
-
-      loadData()
-
-    }
-
-
-  }catch(e){
-
-  }
-
-}
-async function loadData(){
-
+async function loadData() {
   loading.value = true
-
-  try{
-
+  try {
     const res = await getDishList({
-
       pageNum: page.pageNum,
-
       pageSize: page.pageSize,
-
       name: searchForm.name,
-
       categoryId: searchForm.categoryId
-
     })
-
-
-    if(res.data.code===200){
-
-
+    if (res.data.code === 200) {
       tableData.value = res.data.data.records
-
       page.total = res.data.data.total
     }
-
-
-  }finally{
-
+  } finally {
     loading.value = false
-
   }
-
 }
 
-onMounted(()=>{
-
+onMounted(() => {
   loadData()
   loadCategory()
-
 })
-
-
-
 </script>
 
 <style scoped>
-.dish-container {
-  padding: 0;
+.page {
+  padding: 36px 42px;
+  min-height: 100%;
+  background: var(--surface-page);
 }
 
-.header {
+.page-header {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 28px;
 }
 
-.header span {
-  font-size: 15px;
-  font-weight: 600;
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-3);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.page-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 500;
   color: var(--text-1);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.page-desc {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
 }
 
 .pagination {
-  margin-top: var(--sp-5);
+  padding: 16px 20px;
   display: flex;
   justify-content: flex-end;
 }
 
-.el-row {
-  background: var(--surface-raised);
-  padding: var(--sp-4);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--sp-5) !important;
-  border: 1px solid var(--border-light);
-}
-
-/* Dish cell: image + info side by side */
+/* Dish cell */
 .dish-cell {
   display: flex;
   align-items: center;
@@ -705,9 +430,8 @@ onMounted(()=>{
 }
 
 .dish-img {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-md);
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
 }
 
@@ -717,8 +441,8 @@ onMounted(()=>{
 }
 
 .dish-name {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-1);
   line-height: 1.3;
   margin-bottom: 4px;
@@ -732,25 +456,54 @@ onMounted(()=>{
 }
 
 .dish-category {
-  font-size: 12px;
-  color: var(--accent);
-  background: var(--accent-faint);
+  font-size: 11px;
+  color: var(--text-3);
+  background: #f5f3f0;
   padding: 1px 8px;
-  border-radius: 3px;
-  font-weight: 500;
 }
 
 .dish-desc {
   font-size: 12px;
-  color: var(--text-3);
+  color: var(--text-4);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
+  max-width: 180px;
 }
 
 .price-text {
-  font-weight: 600;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--text-1);
+}
+
+.action-btn {
+  font-size: 12px;
+  padding: 4px 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 400;
+  transition: all 0.15s ease;
+}
+
+.action-edit {
+  color: #fff;
+  background: #3d3731;
+}
+
+.action-edit:hover {
+  background: #524b44;
+}
+
+.action-del {
+  color: var(--danger);
+  background: transparent;
+  border-bottom: 1px solid var(--border-faint);
+  margin-left: 6px;
+}
+
+.action-del:hover {
+  border-bottom-color: var(--danger);
 }
 </style>

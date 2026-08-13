@@ -2,6 +2,8 @@ package org.example.restaurantmanagement.vo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class HotDishVO {
 
@@ -19,5 +21,9 @@ public class HotDishVO {
      * 销售数量
      */
     private Integer quantity;
+
+    private BigDecimal price;
+
+    private BigDecimal amount;
 
 }
