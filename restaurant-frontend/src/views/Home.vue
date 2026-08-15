@@ -27,18 +27,20 @@
         <!-- 菜单 -->
 
         <button
-          class="nav-button"
+          class="admin-button"
           @click="menuOpen = true"
         >
-          菜单
+          导航
         </button>
+
+
 
 
         <!-- 顾客登录 -->
 
         <button
           v-if="!customer"
-          class="login-button"
+          class="admin-button"
           @click="goLogin1"
         >
           登录
@@ -47,23 +49,28 @@
 
         <!-- 已登录 -->
 
-        <button
-          v-else
-          class="customer-button"
-          @click="goOrders"
-        >
-          {{  "订单管理" }}
-        </button>
+        <template v-else>
+
+          <button
+            class="admin-button"
+            @click="goOrders"
+          >
+            订单管理
+          </button>
+
+          <button
+            class="admin-button"
+            @click="logout"
+          >
+            退出登录
+          </button>
+
+        </template>
 
 
         <!-- 管理后台登录 -->
 
-        <button
-          class="admin-button"
-          @click="goLogin1"
-        >
-          登录
-        </button>
+
 
       </div>
 
@@ -651,6 +658,7 @@ import {
 import {
   getDishList
 } from "@/api/dish"
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 
 // =========================
@@ -746,6 +754,37 @@ async function loadDishes() {
   }
 
 }
+async function logout() {
+
+  try {
+
+    await ElMessageBox.confirm(
+      "确定要退出当前账号吗？",
+      "退出登录",
+      {
+        confirmButtonText: "退出",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    )
+
+    localStorage.removeItem("token")
+
+    localStorage.removeItem("customer")
+
+    customer.value = null
+
+    ElMessage.success(
+      "已退出登录"
+    )
+
+  } catch {
+
+    // 用户取消
+
+  }
+
+}
 
 
 // =========================
@@ -793,12 +832,16 @@ onMounted(() => {
 // =========================
 
 function goLogin1() {
-  // 拿到当前页面的完整路径（比如 /dish/101）
   const currentPath = router.currentRoute.value.fullPath;
 
-  // 跳转到登录页，并通过 query 参数携带“来源地址”
+  // 如果已经在登录页，就不带 redirect（或直接跳首页）
+  if (currentPath.includes('/customer/login')) {
+    router.push('/customer/login');
+    return;
+  }
+
   router.push({
-    path: "/customer/login",
+    path: '/customer/login',
     query: { redirect: currentPath }
   });
 }
@@ -1206,18 +1249,18 @@ button {
 
 
 .hero-image {
-
   position: absolute;
 
   inset: 0;
 
-  background:
-    linear-gradient(
-      135deg,
-      #6e6255,
-      #2e2a26
-    );
+  background-image:
+    url("/images/home/hero.jpg");
 
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
 }
 
 
@@ -1324,6 +1367,36 @@ button {
   font-size: 10px;
 
   letter-spacing: 3px;
+
+}
+.logout-button {
+
+  padding: 0;
+
+  border: none;
+
+  background: none;
+
+  color: rgba(255,255,255,.65);
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  letter-spacing: .08em;
+
+  transition:
+    opacity .25s,
+    color .25s;
+
+}
+
+
+.logout-button:hover {
+
+  color: white;
+
+  opacity: .75;
 
 }
 
@@ -1923,12 +1996,14 @@ span:first-child {
 
   height: 100%;
 
-  background:
-    linear-gradient(
-      135deg,
-      #827666,
-      #37312b
-    );
+  background-image:
+    url("/images/home/space.jpg");
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
 
   transition:
     transform .8s;

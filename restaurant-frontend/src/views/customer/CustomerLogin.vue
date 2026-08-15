@@ -10,7 +10,11 @@
       <h1 class="login-title">顾客登录</h1>
       <p class="login-desc">登录后即可下单和查看订单</p>
 
-      <el-form :model="form" class="login-form">
+      <el-form
+        :model="form"
+        class="login-form"
+        @submit.prevent="login"
+      >
         <el-form-item>
           <el-input
             v-model="form.phone"
@@ -33,8 +37,8 @@
 
         <el-form-item>
           <button
+            type="submit"
             class="login-btn"
-            @click="login"
           >
             登 录
           </button>
@@ -82,44 +86,35 @@ async function login() {
 
     if (res.data.code === 200) {
 
-      // =========================
-      // 保存 token
-      // =========================
+      console.log("登录返回：", res.data)
 
+      // 保存 JWT
       localStorage.setItem(
         "token",
         res.data.data.token
       )
 
-
-      // =========================
       // 保存顾客信息
-      // =========================
-
       localStorage.setItem(
         "customer",
-        JSON.stringify(
-          res.data.data.user
-        )
+        JSON.stringify(res.data.data.user)
       )
-
 
       ElMessage.success("登录成功")
 
+      // 获取登录前页面
+      const redirect =
+        router.currentRoute.value.query.redirect
 
-      // =========================
-      // 顾客登录成功
-      // 直接回首页
-      // =========================
+      if (redirect) {
 
-      router.push("/")
+        router.push(redirect)
 
-    } else {
+      } else {
 
-      ElMessage.error(
-        res.data.message ||
-        "登录失败"
-      )
+        router.push("/")
+
+      }
 
     }
 
