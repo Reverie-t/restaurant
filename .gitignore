@@ -18,9 +18,6 @@ dist/
 # Logs
 *.log
 
-# 本地上传的菜品图片
-restaurant-management/upload/
-
 # 支付宝沙箱私钥，只留在本机
 restaurant-management/src/main/java/org/example/restaurantmanagement/config/AlipayConfig.java
 
