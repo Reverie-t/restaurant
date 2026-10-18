@@ -36,3 +36,23 @@ export function getMyOrderList() {
   return request.get("/orders/my")
 
 }
+// 模拟支付
+export function payOrder(id) {
+
+  return request.post("/orders/pay/" + id)
+
+}
+
+// 支付宝沙箱支付：创建收银台表单（后端返回 HTML 片段）
+export function createAlipayForm(orderId) {
+
+  return request.post("/pay/alipay/create/" + orderId)
+
+}
+
+// 支付宝沙箱支付：主动查询订单支付状态
+export function queryAlipayPay(orderId) {
+
+  return request.get("/pay/alipay/query/" + orderId)
+
+}

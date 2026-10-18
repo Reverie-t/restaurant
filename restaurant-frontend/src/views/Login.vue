@@ -1,6 +1,13 @@
 <template>
   <div class="login-page">
     <div class="login-card">
+      <button
+        class="back-btn"
+        @click="router.push('/')"
+      >
+        ← 返回首页
+      </button>
+
       <div class="eyebrow">RESTAURANT MANAGEMENT</div>
       <h1 class="login-title">餐馆管理系统</h1>
       <p class="login-desc">请登录您的账号以继续</p>
@@ -95,6 +102,24 @@ const handleLogin = async () => {
   background: var(--surface-card);
   border: 1px solid var(--border);
   padding: 48px 40px 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s var(--ease);
+}
+
+.back-btn:hover {
+  color: var(--text-1);
 }
 
 .eyebrow {

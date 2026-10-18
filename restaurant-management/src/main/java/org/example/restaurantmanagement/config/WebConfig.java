@@ -24,8 +24,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
 
                 .excludePathPatterns(
+                        // 管理员登录
                         "/api/login",
-                        "/api/customer/login"
+
+                        // 顾客登录
+                        "/api/customer/login",
+
+                        // 顾客注册
+                        "/api/customer/register",
+
+                        // 支付宝异步通知（支付宝服务器调用，无登录态）
+                        "/api/pay/alipay/notify"
                 );
     }
     @Override

@@ -1,10 +1,12 @@
 package org.example.restaurantmanagement.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.restaurantmanagement.dto.OrderAddRequest;
 import org.example.restaurantmanagement.dto.OrderStatusRequest;
 import org.example.restaurantmanagement.dto.Result;
+import org.example.restaurantmanagement.dto.TakeawayAddRequest;
 import org.example.restaurantmanagement.service.OrdersService;
 import org.springframework.web.bind.annotation.*;
 
@@ -145,10 +147,42 @@ public class OrdersController {
                 "当前登录用户ID：" + userId
         );
 
-        ordersService.add(
+        Long orderId = ordersService.add(
                 request,
                 userId
         );
+
+        // 雪花 ID 超过 JS 安全整数范围，必须转成字符串返回，避免前端精度丢失
+        return Result.success(String.valueOf(orderId));
+    }
+
+
+    /**
+     * ============================
+     * 模拟支付
+     * 顾客使用
+     * ============================
+     */
+    @PostMapping("/pay/{id}")
+    public Result<?> pay(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+
+        Long userId = ((Number) request
+                .getAttribute("userId"))
+                .longValue();
+
+        ordersService.pay(id, userId);
+
+        return Result.success(null);
+    }
+    @PostMapping("/takeaway")
+    public Result<?> addTakeaway(
+            @RequestBody @Valid TakeawayAddRequest request
+    ) {
+
+        ordersService.addTakeaway(request);
 
         return Result.success(null);
     }

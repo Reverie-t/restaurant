@@ -4,6 +4,7 @@ package org.example.restaurantmanagement.service;
 import lombok.RequiredArgsConstructor;
 import org.example.restaurantmanagement.dto.OrderAddRequest;
 import org.example.restaurantmanagement.dto.OrderDetailRequest;
+import org.example.restaurantmanagement.dto.TakeawayAddRequest;
 import org.example.restaurantmanagement.entity.OrderDetail;
 import org.example.restaurantmanagement.entity.Orders;
 import org.example.restaurantmanagement.mapper.DishMapper;
@@ -180,10 +181,10 @@ public class OrdersService {
 
 
         // =========================
-        // ⑥ 堂食完成 → 释放餐桌
+        // ⑥ 堂食完成 / 取消 → 释放餐桌
         // =========================
 
-        if (status == 4
+        if ((status == 4 || status == 5)
                 && oldOrder.getOrderType() == 1
                 && oldOrder.getTableNo() != null) {
 
@@ -211,7 +212,7 @@ public class OrdersService {
         }
     }
     @Transactional
-    public void add(OrderAddRequest request,Long userId) {
+    public Long add(OrderAddRequest request,Long userId) {
 
         // =========================
         // ① 计算总金额
@@ -311,6 +312,8 @@ public class OrdersService {
 
         order.setStatus(1);
 
+        order.setPayStatus(0);
+
 
         // =========================
         // ⑦ 时间
@@ -357,10 +360,285 @@ public class OrdersService {
 
             orderDetailMapper.insert(detail);
         }
+
+        return order.getId();
     }
+
+
+    /**
+     * ============================
+     * 模拟支付：将订单标记为已支付
+     * ============================
+     */
+    @Transactional
+    public void pay(Long id, Long userId) {
+
+        Orders order = ordersMapper.selectById(id);
+
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+
+        if (!order.getUserId().equals(userId)) {
+            throw new RuntimeException("无权操作该订单");
+        }
+
+        if (order.getStatus() == 5) {
+            throw new RuntimeException("订单已取消，无法支付");
+        }
+
+        if (order.getPayStatus() != null && order.getPayStatus() == 1) {
+            throw new RuntimeException("订单已支付，请勿重复支付");
+        }
+
+        Orders update = new Orders();
+
+        update.setId(id);
+
+        update.setPayStatus(1);
+
+        update.setUpdateTime(LocalDateTime.now());
+
+        ordersMapper.updateById(update);
+    }
+
+    /**
+     * 将订单标记为"已支付"。
+     * <p>
+     * 支付宝沙箱支付成功（同步回跳 / 异步通知 / 主动查单）后调用。
+     * </p>
+     *
+     * @param id 订单 ID
+     */
+    @Transactional
+    public void markPaid(Long id) {
+        Orders order = ordersMapper.selectById(id);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        if (order.getPayStatus() != null && order.getPayStatus() == 1) {
+            return; // 幂等：已支付不重复处理
+        }
+        Orders update = new Orders();
+        update.setId(id);
+        update.setPayStatus(1);
+        update.setUpdateTime(LocalDateTime.now());
+        ordersMapper.updateById(update);
+    }
+
+    /**
+     * 查询订单归属并返回订单金额（用于支付接口校验）。
+     */
+    public Orders getPayableOrder(Long id, Long userId) {
+        Orders order = ordersMapper.selectById(id);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        if (order.getUserId() == null || !order.getUserId().equals(userId)) {
+            throw new RuntimeException("无权操作该订单");
+        }
+        if (order.getStatus() != null && order.getStatus() == 5) {
+            throw new RuntimeException("订单已取消，无法支付");
+        }
+        if (order.getPayStatus() != null && order.getPayStatus() == 1) {
+            throw new RuntimeException("订单已支付，请勿重复支付");
+        }
+        return order;
+    }
+
+
     public List<OrderVO> myList(Long userId) {
 
         return ordersMapper.myList(userId);
+
+    }
+    @Transactional
+    public void addTakeaway(
+            TakeawayAddRequest request
+    ) {
+
+        // =========================
+        // ① 计算订单总金额
+        // =========================
+
+        BigDecimal totalAmount =
+                BigDecimal.ZERO;
+
+
+        for (
+                OrderDetailRequest item
+                : request.getDetails()
+        ) {
+
+            Dish dish =
+                    dishMapper.selectById(
+                            item.getDishId()
+                    );
+
+
+            if (dish == null) {
+
+                throw new RuntimeException(
+                        "菜品不存在：" +
+                                item.getDishId()
+                );
+
+            }
+
+
+            if (
+                    item.getQuantity() == null ||
+                            item.getQuantity() <= 0
+            ) {
+
+                throw new RuntimeException(
+                        "菜品数量必须大于0"
+                );
+
+            }
+
+
+            totalAmount =
+                    totalAmount.add(
+                            dish.getPrice()
+                                    .multiply(
+                                            BigDecimal.valueOf(
+                                                    item.getQuantity()
+                                            )
+                                    )
+                    );
+        }
+
+
+        // =========================
+        // ② 创建订单
+        // =========================
+
+        Orders order =
+                new Orders();
+
+
+        order.setOrderNo(
+                System.currentTimeMillis() + ""
+        );
+
+
+        // 外卖
+        order.setOrderType(3);
+
+
+        // 后台人工创建
+        // 不绑定当前管理员账号
+        order.setUserId(null);
+
+
+        order.setPickupName(
+                request.getPickupName()
+        );
+
+
+        order.setPickupPhone(
+                request.getPickupPhone()
+        );
+
+
+        order.setRemark(
+                request.getRemark()
+        );
+
+
+        order.setTotalAmount(
+                totalAmount
+        );
+
+
+        // 待确认
+        order.setStatus(1);
+
+
+        // 后台代客下单，视为已收款
+        order.setPayStatus(1);
+
+
+        order.setCreateTime(
+                LocalDateTime.now()
+        );
+
+
+        order.setUpdateTime(
+                LocalDateTime.now()
+        );
+
+
+        // =========================
+        // ③ 保存订单
+        // =========================
+
+        ordersMapper.insert(order);
+
+
+        // =========================
+        // ④ 保存订单明细
+        // =========================
+
+        for (
+                OrderDetailRequest item
+                : request.getDetails()
+        ) {
+
+            Dish dish =
+                    dishMapper.selectById(
+                            item.getDishId()
+                    );
+
+
+            BigDecimal subtotal =
+                    dish.getPrice()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            item.getQuantity()
+                                    )
+                            );
+
+
+            OrderDetail detail =
+                    new OrderDetail();
+
+
+            detail.setOrderId(
+                    order.getId()
+            );
+
+
+            detail.setDishId(
+                    dish.getId()
+            );
+
+
+            detail.setDishName(
+                    dish.getName()
+            );
+
+
+            detail.setDishPrice(
+                    dish.getPrice()
+            );
+
+
+            detail.setQuantity(
+                    item.getQuantity()
+            );
+
+
+            detail.setSubtotal(
+                    subtotal
+            );
+
+
+            orderDetailMapper.insert(
+                    detail
+            );
+        }
 
     }
 

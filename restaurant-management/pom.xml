@@ -84,6 +84,13 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- 支付宝开放平台 SDK（沙箱/正式通用） -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.40.984.ALL</version>
+        </dependency>
     </dependencies>
 
     <build>

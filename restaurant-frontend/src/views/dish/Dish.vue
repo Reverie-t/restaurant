@@ -3,7 +3,7 @@
 
     <!-- Page Header -->
     <div class="page-header">
-      <div>
+      <div class="header">
         <div class="eyebrow">DISH</div>
         <h1 class="page-title">菜品管理</h1>
         <p class="page-desc">管理菜单中的所有菜品信息</p>

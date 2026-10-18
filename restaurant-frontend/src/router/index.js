@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 
+import CustomerRegister
+  from "@/views/customer/CustomerRegister.vue"
 import Layout from '@/views/layout/Layout.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import User from '@/views/user/User.vue'
@@ -71,6 +73,10 @@ const router = createRouter({
       path: "/customer/login",
       name: "CustomerLogin",
       component: CustomerLogin
+    },{
+      path: "/customer/register",
+      name: "CustomerRegister",
+      component: CustomerRegister
     },{
       path: "/customer/orders",
       name: "CustomerOrders",
@@ -151,11 +157,13 @@ router.beforeEach((to, from, next) => {
   // ② 顾客登录页
   // =========================================
 
-  if (to.path === "/customer/login") {
+  if (
+    to.path === "/customer/login" ||
+    to.path === "/customer/register"
+  ) {
     next()
     return
   }
-
 
   // =========================================
   // ③ 后台管理系统

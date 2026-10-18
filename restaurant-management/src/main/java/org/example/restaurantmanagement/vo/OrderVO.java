@@ -38,6 +38,12 @@ public class OrderVO {
     private String statusName;
 
 
+    /**
+     * 支付状态 0未支付 1已支付
+     */
+    private Integer payStatus;
+
+
     private String tableNo;
 
 

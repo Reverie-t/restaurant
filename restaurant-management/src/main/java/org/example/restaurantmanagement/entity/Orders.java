@@ -84,6 +84,15 @@ public class Orders {
 
 
     /**
+     * 支付状态
+     *
+     * 0 未支付
+     * 1 已支付
+     */
+    private Integer payStatus;
+
+
+    /**
      * 备注
      */
     private String remark;

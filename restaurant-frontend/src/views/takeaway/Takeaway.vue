@@ -18,12 +18,23 @@
         </p>
       </div>
 
-      <button
-        class="refresh-btn"
-        @click="loadOrders"
-      >
-        ↻ 刷新
-      </button>
+      <div class="header-actions">
+
+        <button
+          class="refresh-btn"
+          @click="loadOrders"
+        >
+          ↻ 刷新
+        </button>
+
+        <button
+          class="primary-btn"
+          @click="openAdd"
+        >
+          ＋ 新增外卖
+        </button>
+
+      </div>
 
     </div>
 
@@ -66,42 +77,42 @@
 
         <button
           :class="{ active: currentStatus === null }"
-          @click="changeStatus(null)"
+          @click="filterByStatus(null)"
         >
           全部
         </button>
 
         <button
           :class="{ active: currentStatus === 1 }"
-          @click="changeStatus(1)"
+          @click="filterByStatus(1)"
         >
           待确认
         </button>
 
         <button
           :class="{ active: currentStatus === 2 }"
-          @click="changeStatus(2)"
+          @click="filterByStatus(2)"
         >
           制作中
         </button>
 
         <button
           :class="{ active: currentStatus === 3 }"
-          @click="changeStatus(3)"
+          @click="filterByStatus(3)"
         >
           待取餐
         </button>
 
         <button
           :class="{ active: currentStatus === 4 }"
-          @click="changeStatus(4)"
+          @click="filterByStatus(4)"
         >
           已完成
         </button>
 
         <button
           :class="{ active: currentStatus === 5 }"
-          @click="changeStatus(5)"
+          @click="filterByStatus(5)"
         >
           已取消
         </button>
@@ -449,6 +460,183 @@
       </div>
 
     </el-dialog>
+    <el-dialog
+      v-model="addVisible"
+      title="新增外卖订单"
+      width="680px"
+    >
+
+      <div class="add-form">
+
+        <!-- 顾客信息 -->
+
+        <div class="add-info">
+
+          <div class="form-field">
+
+            <label>
+              取餐人
+            </label>
+
+            <input
+              v-model="addForm.pickupName"
+              placeholder="请输入取餐人"
+            />
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              联系电话
+            </label>
+
+            <input
+              v-model="addForm.pickupPhone"
+              placeholder="请输入联系电话"
+            />
+
+          </div>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            备注
+          </label>
+
+          <textarea
+            v-model="addForm.remark"
+            placeholder="请输入订单备注"
+          ></textarea>
+
+        </div>
+
+
+        <!-- 菜品 -->
+
+        <div class="items-title">
+          ORDER ITEMS
+        </div>
+
+
+        <div
+          v-for="(item, index) in addForm.details"
+          :key="index"
+          class="add-item"
+        >
+
+          <select
+            v-model="item.dishId"
+            @change="updateItemDish(item)"
+          >
+
+            <option
+              :value="null"
+              disabled
+            >
+              选择菜品
+            </option>
+
+            <option
+              v-for="dish in menuDishes"
+              :key="dish.id"
+              :value="dish.id"
+            >
+              {{ dish.name }}
+              · ¥{{ dish.price }}
+            </option>
+
+          </select>
+
+
+          <div class="quantity-control">
+
+            <button
+              type="button"
+              @click="decreaseQuantity(item)"
+            >
+              −
+            </button>
+
+            <span>
+          {{ item.quantity }}
+        </span>
+
+            <button
+              type="button"
+              @click="increaseQuantity(item)"
+            >
+              ＋
+            </button>
+
+          </div>
+
+
+          <strong>
+            ¥{{ item.subtotal.toFixed(2) }}
+          </strong>
+
+
+          <button
+            type="button"
+            class="remove-item"
+            @click="removeItem(index)"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <button
+          class="add-item-btn"
+          type="button"
+          @click="addItem"
+        >
+          ＋ 添加菜品
+        </button>
+
+
+        <!-- 总计 -->
+
+        <div class="add-total">
+
+      <span>
+        TOTAL
+      </span>
+
+          <strong>
+            ¥{{ addTotalAmount.toFixed(2) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <template #footer>
+
+        <button
+          class="dialog-cancel"
+          @click="addVisible = false"
+        >
+          取消
+        </button>
+
+        <button
+          class="dialog-confirm"
+          @click="submitAdd"
+        >
+          创建订单
+        </button>
+
+      </template>
+
+    </el-dialog>
 
   </div>
 </template>
@@ -458,7 +646,7 @@
 
 import {
   ref,
-  onMounted
+  onMounted,computed
 } from "vue"
 
 import {
@@ -467,7 +655,24 @@ import {
 } from "element-plus"
 
 import request from "@/utils/request"
+import {
+  getMenuDishes
+} from "@/api/dish"
 
+// ================================
+// 新增外卖
+// ================================
+
+const addVisible = ref(false)
+
+const menuDishes = ref([])
+
+const addForm = ref({
+  pickupName: "",
+  pickupPhone: "",
+  remark: "",
+  details: []
+})
 
 const orders = ref([])
 
@@ -483,6 +688,281 @@ const currentOrder = ref(null)
 // ================================
 // 获取订单
 // ================================
+async function submitAdd() {
+
+  if (!addForm.value.pickupName) {
+
+    ElMessage.warning(
+      "请输入取餐人"
+    )
+
+    return
+
+  }
+
+
+  if (!addForm.value.pickupPhone) {
+
+    ElMessage.warning(
+      "请输入联系电话"
+    )
+
+    return
+
+  }
+
+
+  const validDetails =
+    addForm.value.details
+      .filter(
+        item =>
+          item.dishId !== null
+      )
+
+
+  if (
+    validDetails.length === 0
+  ) {
+
+    ElMessage.warning(
+      "请至少选择一道菜品"
+    )
+
+    return
+
+  }
+
+
+  try {
+
+    const data = {
+
+      pickupName:
+      addForm.value.pickupName,
+
+      pickupPhone:
+      addForm.value.pickupPhone,
+
+      remark:
+      addForm.value.remark,
+
+      details:
+        validDetails.map(
+          item => ({
+            dishId:
+            item.dishId,
+
+            quantity:
+            item.quantity
+          })
+        )
+
+    }
+
+
+    const res =
+      await request.post(
+        "/orders/takeaway",
+        data
+      )
+
+
+    if (res.data.code === 200) {
+
+      ElMessage.success(
+        "外卖订单创建成功"
+      )
+
+      addVisible.value = false
+
+      await loadOrders()
+
+    } else {
+
+      ElMessage.error(
+        res.data.message ||
+        "订单创建失败"
+      )
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "创建外卖订单失败",
+      error
+    )
+
+    ElMessage.error(
+      error?.response?.data?.message ||
+      "创建外卖订单失败"
+    )
+
+  }
+
+}
+
+function addItem() {
+
+  addForm.value.details.push({
+
+    dishId: null,
+
+    quantity: 1,
+
+    dishName: "",
+
+    dishPrice: 0,
+
+    subtotal: 0
+
+  })
+
+}
+function updateItemDish(item) {
+
+  const dish =
+    menuDishes.value.find(
+      d =>
+        d.id === item.dishId
+    )
+
+
+  if (!dish) {
+
+    item.dishName = ""
+
+    item.dishPrice = 0
+
+    item.subtotal = 0
+
+    return
+
+  }
+
+
+  item.dishName =
+    dish.name
+
+  item.dishPrice =
+    Number(dish.price)
+
+
+  item.subtotal =
+    item.dishPrice *
+    item.quantity
+
+}
+function increaseQuantity(item) {
+
+  item.quantity++
+
+  item.subtotal =
+    item.dishPrice *
+    item.quantity
+
+}
+
+
+function decreaseQuantity(item) {
+
+  if (item.quantity <= 1) {
+
+    return
+
+  }
+
+  item.quantity--
+
+  item.subtotal =
+    item.dishPrice *
+    item.quantity
+
+}
+function removeItem(index) {
+
+  addForm.value.details.splice(
+    index,
+    1
+  )
+
+
+  if (
+    addForm.value.details.length === 0
+  ) {
+
+    addItem()
+
+  }
+
+}
+const addTotalAmount =
+  computed(() => {
+
+    return addForm.value.details
+      .reduce(
+        (total, item) =>
+          total +
+          Number(item.subtotal || 0),
+        0
+      )
+
+  })
+
+
+async function openAdd() {
+
+  addForm.value = {
+
+    pickupName: "",
+
+    pickupPhone: "",
+
+    remark: "",
+
+    details: []
+
+  }
+
+
+  addItem()
+
+  try {
+
+    const res =
+      await getMenuDishes()
+
+
+    if (res.data.code === 200) {
+
+      menuDishes.value =
+        res.data.data || []
+
+      addVisible.value = true
+
+    } else {
+
+      ElMessage.error(
+        res.data.message ||
+        "菜品加载失败"
+      )
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "加载菜品失败",
+      error
+    )
+
+    ElMessage.error(
+      "加载菜品失败"
+    )
+
+  }
+
+}
 
 async function loadOrders() {
 
@@ -543,13 +1023,7 @@ async function loadOrders() {
 // 状态筛选
 // ================================
 
-function changeStatus(status) {
 
-  currentStatus.value = status
-
-  loadOrders()
-
-}
 
 
 // ================================
@@ -566,10 +1040,23 @@ function countByStatus(status) {
 
 
 // ================================
+// 按状态筛选订单
+// ================================
+
+function filterByStatus(status) {
+
+  currentStatus.value = status
+
+  loadOrders()
+
+}
+
+
+// ================================
 // 修改状态
 // ================================
 
-async function changeOrderStatus(order, status) {
+async function changeStatus(order, status) {
 
   try {
 
@@ -988,6 +1475,308 @@ onMounted(() => {
   letter-spacing: 2px;
   color: #9b938b;
   margin-bottom: 14px;
+}
+.add-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 18px;
+}
+
+
+.form-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-bottom: 16px;
+}
+
+
+.form-field label {
+  font-size: 12px;
+
+  color: #8b8176;
+}
+
+
+.form-field input,
+.form-field textarea {
+
+  border: 1px solid #d8d0c7;
+
+  background: #fff;
+
+  padding: 10px 12px;
+
+  outline: none;
+
+  font-family: inherit;
+
+  color: #403a35;
+
+}
+
+
+.form-field input:focus,
+.form-field textarea:focus {
+
+  border-color: #8b8176;
+
+}
+
+
+.form-field textarea {
+
+  min-height: 80px;
+
+  resize: vertical;
+
+}
+
+
+.items-title {
+
+  margin-top: 24px;
+
+  margin-bottom: 12px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #eee9e4;
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  color: #9b938b;
+
+}
+
+
+.add-item {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 100px 80px 30px;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px 0;
+
+  border-bottom:
+    1px solid #f0ece8;
+
+}
+
+
+.add-item select {
+
+  height: 36px;
+
+  border: 1px solid #d8d0c7;
+
+  background: #fff;
+
+  padding: 0 10px;
+
+  color: #403a35;
+
+}
+
+
+.quantity-control {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+
+}
+
+
+.quantity-control button {
+
+  width: 26px;
+
+  height: 26px;
+
+  border: 1px solid #d8d0c7;
+
+  background: transparent;
+
+  color: #4d4640;
+
+  cursor: pointer;
+
+}
+
+
+.quantity-control span {
+
+  min-width: 20px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+}
+
+
+.add-item strong {
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 18px;
+
+  font-weight: 500;
+
+  color: #403a35;
+
+}
+
+
+.remove-item {
+
+  border: none;
+
+  background: none;
+
+  font-size: 20px;
+
+  color: #9b938b;
+
+  cursor: pointer;
+
+}
+
+
+.remove-item:hover {
+
+  color: #806767;
+
+}
+
+
+.add-item-btn {
+
+  margin-top: 14px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #70675f;
+
+  cursor: pointer;
+
+  padding: 7px 0;
+
+}
+
+
+.add-item-btn:hover {
+
+  color: #302b27;
+
+}
+
+
+.add-total {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-top: 20px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #ddd6ce;
+
+}
+
+
+.add-total span {
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  color: #918980;
+
+}
+
+
+.add-total strong {
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 28px;
+
+  font-weight: 500;
+
+  color: #302b27;
+
+}
+
+
+.dialog-cancel,
+.dialog-confirm {
+
+  padding: 10px 18px;
+
+  cursor: pointer;
+
+}
+
+
+.dialog-cancel {
+
+  border: 1px solid #d8d0c7;
+
+  background: transparent;
+
+  color: #4d4640;
+
+}
+
+
+.dialog-confirm {
+
+  margin-left: 8px;
+
+  border: none;
+
+  background: #3d3731;
+
+  color: white;
+
+}
+
+
+.dialog-confirm:hover {
+
+  background: #51483f;
+
 }
 
 .dish-row {

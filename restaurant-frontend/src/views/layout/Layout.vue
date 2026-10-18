@@ -3,8 +3,8 @@
     <!-- Sidebar -->
     <el-aside :width="isCollapse ? '64px' : '220px'" class="aside">
       <div class="logo" :class="{ 'logo-collapse': isCollapse }">
-        <span v-if="!isCollapse" class="logo-text">餐馆管理系统</span>
-        <span v-else class="logo-text">餐</span>
+        <span v-if="!isCollapse" class="logo-text">{{ $t('app.title') }}</span>
+        <span v-else class="logo-text">{{ $t('app.titleShort') }}</span>
       </div>
 
       <el-menu
@@ -15,12 +15,12 @@
       >
         <el-menu-item index="/admin/dashboard">
           <el-icon><HomeFilled /></el-icon>
-          <template #title>首页</template>
+          <template #title>{{ $t('menu.home') }}</template>
         </el-menu-item>
 
         <el-menu-item index="/admin/user">
           <el-icon><User /></el-icon>
-          <template #title>用户管理</template>
+          <template #title>{{ $t('menu.user') }}</template>
         </el-menu-item>
 
         <el-menu-item index="/admin/category">
@@ -71,14 +71,27 @@
         </div>
 
         <div class="user-info">
-          <el-avatar :size="30" class="user-avatar">
-            {{ username.charAt(0) }}
-          </el-avatar>
-          <span class="username">{{ username }}</span>
-          <el-button type="danger" size="small" @click="logout" plain>
-            退出登录
-          </el-button>
-        </div>
+  <el-avatar :size="30" class="user-avatar">
+    {{ username.charAt(0) }}
+  </el-avatar>
+  <span class="username">{{ username }}</span>
+
+  <el-dropdown @command="changeLocale">
+    <span class="locale-trigger">
+      {{ locale === 'zh-CN' ? '中文' : 'English' }}
+    </span>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item command="zh-CN">中文</el-dropdown-item>
+        <el-dropdown-item command="en-US">English</el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
+
+  <el-button type="danger" size="small" @click="logout" plain>
+    退出登录
+  </el-button>
+</div>
       </el-header>
 
       <el-main class="main-content">
@@ -89,12 +102,28 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   HomeFilled, User, Menu, Food, Grid,Money,TakeawayBox,Box, List, Fold, Expand
 } from '@element-plus/icons-vue'
 
+
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import en from 'element-plus/es/locale/lang/en'
+
+const { locale } = useI18n()
+
+
+
+function changeLocale(lang) {
+  locale.value = lang
+  localStorage.setItem('locale', lang)
+}
 const router = useRouter()
 const route = useRoute()
 
@@ -102,7 +131,7 @@ const isCollapse = ref(false)
 const currentRoute = computed(() => route.path)
 
 const user = JSON.parse(localStorage.getItem("user"))
-const username = user?.username || "未登录"
+const username = user?.username || t('auth.notLoggedIn')
 
 const logout = () => {
   localStorage.removeItem("user")

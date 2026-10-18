@@ -41,7 +41,7 @@
         <el-table-column prop="role" label="角色" width="100">
           <template #default="scope">
             <span class="role-tag" :class="scope.row.role === 'admin' ? 'role-admin' : 'role-staff'">
-              {{ scope.row.role === 'admin' ? '管理员' : '员工' }}
+              {{ scope.row.role === 'admin' ? '管理员' : '顾客' }}
             </span>
           </template>
         </el-table-column>
@@ -100,7 +100,7 @@
         <el-form-item label="角色" prop="role">
           <el-select v-model="form.role" style="width: 100%;">
             <el-option label="管理员" value="admin" />
-            <el-option label="员工" value="staff" />
+            <el-option label="顾客" value="user" />
           </el-select>
         </el-form-item>
 

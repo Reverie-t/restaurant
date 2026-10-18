@@ -14,54 +14,118 @@ public class CustomerService {
 
     private final UserMapper userMapper;
 
-    public User login(String phone, String password) {
 
-        // 查询顾客
-        User user = userMapper.selectOne(
-                new LambdaQueryWrapper<User>()
-                        .eq(User::getPhone, phone)
-                        .eq(User::getRole, "user")
-                        .last("LIMIT 1")
-        );
+    /**
+     * 顾客登录
+     */
+    public User login(
+            String phone,
+            String password
+    ) {
 
-        // =========================
-        // 用户不存在 → 自动注册
-        // =========================
+        User user =
+                userMapper.selectOne(
+                        new LambdaQueryWrapper<User>()
+                                .eq(
+                                        User::getPhone,
+                                        phone
+                                )
+                                .eq(
+                                        User::getRole,
+                                        "user"
+                                )
+                                .last("LIMIT 1")
+                );
 
         if (user == null) {
 
-            User customer = new User();
-
-            customer.setUsername(phone);
-
-            customer.setPassword(password);
-
-            customer.setRealName("顾客");
-
-            customer.setPhone(phone);
-
-            customer.setRole("user");
-
-            customer.setCreateTime(
-                    LocalDateTime.now()
+            throw new RuntimeException(
+                    "该手机号未注册，请先注册"
             );
 
-            userMapper.insert(customer);
-
-            return customer;
         }
 
-        // =========================
-        // 用户存在 → 验证密码
-        // =========================
-
-        if (!user.getPassword().equals(password)) {
+        if (
+                !user.getPassword()
+                        .equals(password)
+        ) {
 
             throw new RuntimeException(
                     "手机号或密码错误"
             );
+
         }
 
         return user;
+    }
+
+
+    /**
+     * 顾客注册
+     */
+    public User register(
+            String phone,
+            String password,
+            String confirmPassword
+    ) {
+
+        if (
+                password == null ||
+                        confirmPassword == null ||
+                        !password.equals(confirmPassword)
+        ) {
+
+            throw new RuntimeException(
+                    "两次输入的密码不一致"
+            );
+
+        }
+
+
+        User existUser =
+                userMapper.selectOne(
+                        new LambdaQueryWrapper<User>()
+                                .eq(
+                                        User::getPhone,
+                                        phone
+                                )
+                                .eq(
+                                        User::getRole,
+                                        "user"
+                                )
+                                .last("LIMIT 1")
+                );
+
+
+        if (existUser != null) {
+
+            throw new RuntimeException(
+                    "该手机号已经注册"
+            );
+
+        }
+
+
+        User customer =
+                new User();
+
+        customer.setUsername(phone);
+
+        customer.setPassword(password);
+
+        customer.setRealName("顾客");
+
+        customer.setPhone(phone);
+
+        customer.setRole("user");
+
+        customer.setCreateTime(
+                LocalDateTime.now()
+        );
+
+
+        userMapper.insert(customer);
+
+        return customer;
     }
 }

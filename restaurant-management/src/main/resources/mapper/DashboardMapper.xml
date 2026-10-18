@@ -24,36 +24,48 @@
         0
         ) AS todayAmount,
 
+        COALESCE(
         SUM(
         CASE
         WHEN order_type = 1
         THEN 1
         ELSE 0
         END
+        ),
+        0
         ) AS todayDineInCount,
 
+        COALESCE(
         SUM(
         CASE
         WHEN order_type = 2
         THEN 1
         ELSE 0
         END
+        ),
+        0
         ) AS todayTakeoutCount,
 
+        COALESCE(
         SUM(
         CASE
         WHEN status IN (1, 2, 3)
         THEN 1
         ELSE 0
         END
+        ),
+        0
         ) AS pendingOrderCount,
 
+        COALESCE(
         SUM(
         CASE
         WHEN status = 4
         THEN 1
         ELSE 0
         END
+        ),
+        0
         ) AS completedOrderCount
 
         FROM orders

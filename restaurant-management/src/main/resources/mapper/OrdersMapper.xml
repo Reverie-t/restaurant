@@ -19,6 +19,8 @@
 
         status,
 
+        pay_status AS payStatus,
+
         CASE order_type
         WHEN 1 THEN '堂食'
         WHEN 2 THEN '外带'
@@ -70,6 +72,8 @@
             order_no AS orderNo,
 
             status,
+
+            pay_status AS payStatus,
 
             CASE order_type
 
@@ -130,16 +134,39 @@
 
         SELECT
             o.id,
-            o.order_no,
-            o.order_type,
-            o.table_no,
-            o.pickup_name,
-            o.total_amount,
+
+            o.order_no AS orderNo,
+
+            CASE o.order_type
+                WHEN 1 THEN '堂食'
+                WHEN 2 THEN '外带'
+                WHEN 3 THEN '外卖'
+                END AS orderTypeName,
+
+            o.table_no AS tableNo,
+
+            o.pickup_name AS pickupName,
+
+            o.total_amount AS totalAmount,
+
             o.status,
-            o.create_time,
-            o.update_time
+
+            o.pay_status AS payStatus,
+
+            CASE o.status
+                WHEN 1 THEN '待确认'
+                WHEN 2 THEN '制作中'
+                WHEN 3 THEN '待取餐/待上菜'
+                WHEN 4 THEN '已完成'
+                WHEN 5 THEN '已取消'
+                END AS statusName,
+
+            o.create_time AS createTime
+
         FROM orders o
+
         WHERE o.user_id = #{userId}
+
         ORDER BY o.create_time DESC
 
     </select>

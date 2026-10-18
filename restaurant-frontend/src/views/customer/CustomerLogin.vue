@@ -42,6 +42,20 @@
           >
             登 录
           </button>
+          <div class="register-link">
+
+  <span>
+    还没有账号？
+  </span>
+
+            <button
+              type="button"
+              @click="router.push('/customer/register')"
+            >
+              立即注册
+            </button>
+
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -53,6 +67,8 @@ import { reactive } from "vue"
 import { useRouter } from "vue-router"
 import { ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
+
+import { customerLogin } from "@/api/customer"
 import request from "@/utils/request"
 
 const router = useRouter()
@@ -64,68 +80,122 @@ const form = reactive({
 
 async function login() {
 
+  console.log("开始登录")
+
   if (!form.phone) {
+
     ElMessage.warning("请输入手机号")
+
     return
+
   }
 
   if (!form.password) {
+
     ElMessage.warning("请输入密码")
+
     return
+
   }
+
 
   try {
 
     const res =
       await request.post(
         "/customer/login",
-        form
+        {
+          phone: form.phone,
+          password: form.password
+        }
       )
 
-    console.log("登录返回：", res.data)
+
+    console.log(
+      "登录返回：",
+      res.data
+    )
+
 
     if (res.data.code === 200) {
 
-      console.log("登录返回：", res.data)
+      const data =
+        res.data.data
 
-      // 保存 JWT
+
+      console.log(
+        "token：",
+        data.token
+      )
+
+      console.log(
+        "user：",
+        data.user
+      )
+
+
       localStorage.setItem(
         "token",
-        res.data.data.token
+        data.token
       )
 
-      // 保存顾客信息
+
       localStorage.setItem(
         "customer",
-        JSON.stringify(res.data.data.user)
+        JSON.stringify(
+          data.user
+        )
       )
 
-      ElMessage.success("登录成功")
 
-      // 获取登录前页面
+      ElMessage.success(
+        "登录成功"
+      )
+
+
       const redirect =
-        router.currentRoute.value.query.redirect
+        router.currentRoute.value
+          .query.redirect
 
-      if (redirect) {
 
-        router.push(redirect)
+      if (
+        typeof redirect === "string" &&
+        redirect.startsWith("/")
+      ) {
+
+        await router.push(
+          redirect
+        )
 
       } else {
 
-        router.push("/")
+        await router.push("/")
 
       }
+
+    } else {
+
+      ElMessage.error(
+        res.data.message ||
+        "登录失败"
+      )
 
     }
 
   } catch (error) {
 
     console.error(
-      "登录失败",
+      "登录请求失败：",
       error
     )
 
+    console.error(
+      "后端返回：",
+      error?.response?.data
+    )
+
     ElMessage.error(
+      error?.response?.data?.message ||
       "登录失败"
     )
 

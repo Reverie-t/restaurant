@@ -6,6 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -36,4 +38,9 @@ public class GlobalExceptionHandler {
         return Result.error(message);
 
     }
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(BusinessException e) {
+        log.warn("业务异常：{}", e.getMessage());
+    return Result.error(e.getCode(), e.getMessage());
+}
 }
